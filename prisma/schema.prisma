@@ -14,6 +14,7 @@ model User {
   phone           String      @unique
   name            String
   avatar          String?
+  deactivation    Boolean     @default(false) // 계정 정지 시 true
   createdAt       DateTime    @default(now())
   updatedAt       DateTime    @updatedAt
   products        Product[]
@@ -25,10 +26,15 @@ model User {
   fav             Fav[]
   sales           Sale[]
   purchases       Purchase[]
-  record          Record[]
   streams         Stream[]
   messages        Message[]
   login           Login?
+  user1           Room[]    @relation("user1")
+  user2           Room[]    @relation("user2")
+  chat            Chat[]
+  view            View[]
+  manager         Manager?
+  report          Report[]
 }
 
 model Login {
@@ -42,6 +48,12 @@ model Login {
   @@index([userId])
 }
 
+// 관리자 명단
+model Manager {
+  user        User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId      Int        @id
+}
+
 model Product {
   id          Int        @id @default(autoincrement())
   createdAt   DateTime   @default(now())
@@ -51,13 +63,52 @@ model Product {
   image       String     @db.MediumText
   name        String
   price       Int
+  onSale      Boolean    @default(true) // true 판매중, false 판매완료or판매등록취소
   description String     @db.MediumText
+  category    Category   @relation(fields:[categoryId], references: [id], onDelete: SetNull)
+  categoryId  Int
+  address     Address    @relation(fields: [addressId], references: [id], onDelete: SetNull)
+  addressId   Int
   favs        Fav[]
   sales       Sale[]
   purchases   Purchase[]
-  records     Record[]
+  report      Report[]
 
   @@index([userId])
+  @@index([categoryId])
+  @@index([addressId])
+}
+
+// 주소 (daum API 기준)
+model Address {
+  id          Int        @id   // 시군구코드
+  sido        String
+  sigungu     String
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+  product     Product[]
+}
+
+// user 혹은 product 신고
+model Report {
+  id            Int      @id @default(autoincrement())
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId        Int
+  product       Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  productId     Int
+  description   String   @db.MediumText  
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
+
+// 카테고리
+model Category {
+  id          Int        @id
+  name        String     @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  product   Product[]
+  view      View[]
 }
 
 model Fav {
@@ -119,7 +170,7 @@ model Review {
   id           Int      @id @default(autoincrement())
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
-  review       String   @db.MediumText
+  review       Int      @default(0)
   createdBy    User     @relation("writtenReviews", fields: [createdById], references: [id], onDelete: Cascade)
   createdById  Int
   createdFor   User     @relation("receivedReviews", fields: [createdForId], references: [id], onDelete: Cascade)
@@ -130,6 +181,18 @@ model Review {
   @@index([createdForId])
 }
 
+// 조회수
+model View {
+  @@id([ userId, categoryId ])
+
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId       Int
+  category     Category @relation(fields:[categoryId], references: [id], onDelete: Cascade)
+  categoryId   Int
+  viewCount    Int      @default(1)
+}
+
+// 판매정보, 구매자 id, 판매자는 product와 join
 model Sale {
   id        Int      @id @default(autoincrement())
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
@@ -150,20 +213,6 @@ model Purchase {
   product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
   productId Int
   createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  @@index([productId])
-  @@index([userId])
-}
-
-model Record {
-  id        Int      @id @default(autoincrement())
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  userId    Int
-  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
-  productId Int
-  createdAt DateTime @default(now())
-  kind      Kind
   updatedAt DateTime @updatedAt
 
   @@index([productId])
@@ -201,8 +250,32 @@ model Message {
   @@index([userId])
 }
 
-enum Kind {
-  Purchase
-  Sale
-  Fav
+// 1대1 채팅방
+model Room {
+  id            Int       @id @default(autoincrement())
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  user1         User      @relation("user1", fields: [userId1], references: [id], onDelete: SetNull)
+  userId1       Int
+  user2         User      @relation("user2", fields: [userId2], references: [id], onDelete: SetNull)
+  userId2       Int
+  chats         Chat[]
+
+  @@index([userId1])
+  @@index([userId2])
+}
+
+// 채팅
+model Chat {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  user      User     @relation(fields: [userId], references: [id], onDelete: SetNull)
+  userId    Int
+  message   String   @db.MediumText
+  room      Room     @relation(fields: [roomId], references: [id], onDelete: Cascade)
+  roomId    Int
+
+  @@index([roomId])
+  @@index([userId])
 }
