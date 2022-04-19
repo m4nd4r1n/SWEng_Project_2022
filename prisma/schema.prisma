@@ -29,8 +29,7 @@ model User {
   streams         Stream[]
   messages        Message[]
   login           Login?
-  user1           Room[]    @relation("user1")
-  user2           Room[]    @relation("user2")
+  user            Join[]
   chat            Chat[]
   view            View[]
   manager         Manager?
@@ -94,9 +93,10 @@ model Report {
   id            Int      @id @default(autoincrement())
   user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId        Int
-  product       Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
-  productId     Int
-  description   String   @db.MediumText  
+  product       Product? @relation(fields: [productId], references: [id], onDelete: Cascade)
+  productId     Int?     // 상품 신고 시 존재
+  title         String
+  description   String?  @db.MediumText
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
 }
@@ -255,14 +255,17 @@ model Room {
   id            Int       @id @default(autoincrement())
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
-  user1         User      @relation("user1", fields: [userId1], references: [id], onDelete: SetNull)
-  userId1       Int
-  user2         User      @relation("user2", fields: [userId2], references: [id], onDelete: SetNull)
-  userId2       Int
   chats         Chat[]
+  join          Join[]
+}
 
-  @@index([userId1])
-  @@index([userId2])
+model Join {
+  @@id([ roomId, userId ])
+
+  room         Room      @relation(fields: [roomId], references: [id], onDelete: Cascade)
+  roomId       Int
+  user         User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId       Int
 }
 
 // 채팅
