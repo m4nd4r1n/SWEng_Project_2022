@@ -14,7 +14,7 @@ model User {
   phone           String      @unique
   name            String
   avatar          String?
-  deactivation    Boolean     @default(false) // 계정 정지 시 true
+  disabled        Boolean     @default(false) // 계정 정지 시 true
   createdAt       DateTime    @default(now())
   updatedAt       DateTime    @updatedAt
   products        Product[]
