@@ -30,7 +30,6 @@ model User {
   messages        Message[]
   login           Login?
   user            Join[]
-  chat            Chat[]
   view            View[]
   manager         Manager?
   report          Report[]
@@ -49,8 +48,8 @@ model Login {
 
 // 관리자 명단
 model Manager {
-  user        User       @relation(fields: [userId], references: [id], onDelete: Cascade)
-  userId      Int        @id
+  user   User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId Int  @id
 }
 
 model Product {
@@ -64,7 +63,7 @@ model Product {
   price       Int
   onSale      Boolean    @default(true) // true 판매중, false 판매완료or판매등록취소
   description String     @db.MediumText
-  category    Category   @relation(fields:[categoryId], references: [id], onDelete: SetNull)
+  category    Category   @relation(fields: [categoryId], references: [id], onDelete: SetNull)
   categoryId  Int
   address     Address    @relation(fields: [addressId], references: [id], onDelete: SetNull)
   addressId   Int
@@ -80,33 +79,33 @@ model Product {
 
 // 주소 (daum API 기준)
 model Address {
-  id          Int        @id   // 시군구코드
-  sido        String
-  sigungu     String
-  createdAt   DateTime   @default(now())
-  updatedAt   DateTime   @updatedAt
-  product     Product[]
+  id        Int       @id // 시군구코드
+  sido      String
+  sigungu   String
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  product   Product[]
 }
 
 // user 혹은 product 신고
 model Report {
-  id            Int      @id @default(autoincrement())
-  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  userId        Int
-  product       Product? @relation(fields: [productId], references: [id], onDelete: Cascade)
-  productId     Int?     // 상품 신고 시 존재
-  title         String
-  description   String?  @db.MediumText
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
+  id          Int      @id @default(autoincrement())
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId      Int
+  product     Product? @relation(fields: [productId], references: [id], onDelete: Cascade)
+  productId   Int? // 상품 신고 시 존재
+  title       String
+  description String?  @db.MediumText
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 }
 
 // 카테고리
 model Category {
-  id          Int        @id
-  name        String     @unique
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id        Int       @id
+  name      String    @unique
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
   product   Product[]
   view      View[]
 }
@@ -183,13 +182,13 @@ model Review {
 
 // 조회수
 model View {
-  @@id([ userId, categoryId ])
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId     Int
+  category   Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  categoryId Int
+  viewCount  Int      @default(1)
 
-  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  userId       Int
-  category     Category @relation(fields:[categoryId], references: [id], onDelete: Cascade)
-  categoryId   Int
-  viewCount    Int      @default(1)
+  @@id([userId, categoryId])
 }
 
 // 판매정보, 구매자 id, 판매자는 product와 join
@@ -252,33 +251,17 @@ model Message {
 
 // 1대1 채팅방
 model Room {
-  id            Int       @id @default(autoincrement())
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
-  chats         Chat[]
-  join          Join[]
-}
-
-model Join {
-  @@id([ roomId, userId ])
-
-  room         Room      @relation(fields: [roomId], references: [id], onDelete: Cascade)
-  roomId       Int
-  user         User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-  userId       Int
-}
-
-// 채팅
-model Chat {
   id        Int      @id @default(autoincrement())
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-  user      User     @relation(fields: [userId], references: [id], onDelete: SetNull)
-  userId    Int
-  message   String   @db.MediumText
-  room      Room     @relation(fields: [roomId], references: [id], onDelete: Cascade)
-  roomId    Int
+  join      Join[]
+}
 
-  @@index([roomId])
-  @@index([userId])
+model Join {
+  room   Room @relation(fields: [roomId], references: [id], onDelete: Cascade)
+  roomId Int
+  user   User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId Int
+
+  @@id([roomId, userId])
 }
