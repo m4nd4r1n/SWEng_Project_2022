@@ -33,6 +33,7 @@ model User {
   view            View[]
   manager         Manager?
   report          Report[]
+  Wallet          Wallet?
 }
 
 model Login {
@@ -264,4 +265,29 @@ model Join {
   userId Int
 
   @@id([roomId, userId])
+  @@index([roomId])
+  @@index([userId])
+}
+
+model Wallet {
+  id                  Int                   @id @default(autoincrement())
+  createdAt           DateTime              @default(now())
+  updatedAt           DateTime              @updatedAt
+  currency            Int
+  user                User                  @relation(fields: [userId], references: [id])
+  userId              Int                   @unique
+  WalletChargeHistory WalletChargeHistory[]
+
+  @@index([userId])
+}
+
+model WalletChargeHistory {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  amounts   Int
+  wallet    Wallet   @relation(fields: [walletId], references: [id])
+  walletId  Int
+
+  @@index([walletId])
 }
