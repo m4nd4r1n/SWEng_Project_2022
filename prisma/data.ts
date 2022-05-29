@@ -1,4 +1,4 @@
-const categories = [
+export const categories = [
   {
     name: "생활/건강",
     id: 10000,
@@ -45,13 +45,13 @@ const categories = [
   },
 ];
 
-const address = {
+export const address = {
   id: 41135,
   sido: "경기",
   sigungu: "성남시 분당구",
 };
 
-const products = [
+export const products = [
   {
     userId: 1,
     image: "",
@@ -152,5 +152,3 @@ const products = [
     addressId: 41135,
   },
 ];
-
-module.exports = { categories, products, address };
