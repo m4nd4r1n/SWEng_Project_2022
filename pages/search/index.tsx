@@ -6,6 +6,7 @@ import Layout from "@components/layout";
 import useUser from "@libs/client/useUser";
 import useSWR, { SWRConfig } from "swr";
 import { ProductWithCount } from "../index";
+import qs from "qs";
 
 interface ProductsResponse {
   ok: boolean;
@@ -27,19 +28,20 @@ const Dropdown = ({
       className="form-select m-0
         mx-5
         block
+        w-40
         appearance-none
         rounded-lg
         border-2
         border-solid
-        border-gray-400
-        bg-white bg-clip-padding bg-no-repeat
-        px-4 py-2.5
+        border-gray-400 bg-white bg-clip-padding
+        bg-no-repeat px-4
+        py-2.5
         text-base
         font-medium
         text-gray-700
-        transition
-        ease-in-out hover:border-orange-400 focus:border-orange-400 focus:bg-white focus:text-gray-700
-        focus:outline-none focus:ring-4
+        transition ease-in-out hover:border-orange-400 focus:border-orange-400 focus:bg-white
+        focus:text-gray-700 focus:outline-none
+        focus:ring-4
         focus:ring-orange-200"
       onChange={handleChangeSelect}
     >
@@ -59,62 +61,64 @@ const Search: NextPage = () => {
   const { user, isLoading } = useUser();
   const [sort, setSort] = useState("");
   const [catId, setCatId] = useState("");
-  // const { data } = useSWR<ProductsResponse>("/api/products");
-  const data = useMemo(
-    () => ({
-      products: [
-        {
-          id: 1,
-          name: "testProduct",
-          price: 10000,
-          _count: { favs: 0 },
-        },
-        {
-          id: 2,
-          name: "testProduct",
-          price: 10000,
-          _count: { favs: 0 },
-        },
-        {
-          id: 3,
-          name: "testProduct",
-          price: 10000,
-          _count: { favs: 0 },
-        },
-        {
-          id: 4,
-          name: "testProduct",
-          price: 10000,
-          _count: { favs: 0 },
-        },
-        {
-          id: 5,
-          name: "testProduct",
-          price: 10000,
-          _count: { favs: 0 },
-        },
-        {
-          id: 6,
-          name: "testProduct",
-          price: 10000,
-          _count: { favs: 0 },
-        },
-        {
-          id: 7,
-          name: "testProduct",
-          price: 10000,
-          _count: { favs: 0 },
-        },
-        {
-          id: 8,
-          name: "testProduct",
-          price: 10000,
-          _count: { favs: 0 },
-        },
-      ],
-    }),
-    []
+  const { data } = useSWR<ProductsResponse>(
+    `/api/products/search?${qs.stringify({ sort, catId })}`
   );
+  // const data = useMemo(
+  //   () => ({
+  //     products: [
+  //       {
+  //         id: 1,
+  //         name: "testProduct",
+  //         price: 10000,
+  //         _count: { favs: 0 },
+  //       },
+  //       {
+  //         id: 2,
+  //         name: "testProduct",
+  //         price: 10000,
+  //         _count: { favs: 0 },
+  //       },
+  //       {
+  //         id: 3,
+  //         name: "testProduct",
+  //         price: 10000,
+  //         _count: { favs: 0 },
+  //       },
+  //       {
+  //         id: 4,
+  //         name: "testProduct",
+  //         price: 10000,
+  //         _count: { favs: 0 },
+  //       },
+  //       {
+  //         id: 5,
+  //         name: "testProduct",
+  //         price: 10000,
+  //         _count: { favs: 0 },
+  //       },
+  //       {
+  //         id: 6,
+  //         name: "testProduct",
+  //         price: 10000,
+  //         _count: { favs: 0 },
+  //       },
+  //       {
+  //         id: 7,
+  //         name: "testProduct",
+  //         price: 10000,
+  //         _count: { favs: 0 },
+  //       },
+  //       {
+  //         id: 8,
+  //         name: "testProduct",
+  //         price: 10000,
+  //         _count: { favs: 0 },
+  //       },
+  //     ],
+  //   }),
+  //   []
+  // );
 
   const categories = useMemo(
     () => [
@@ -187,10 +191,6 @@ const Search: NextPage = () => {
     ],
     []
   );
-
-  useEffect(() => {
-    console.log(catId, sort);
-  }, [catId, sort]);
 
   return (
     <Layout title="검색" hasTabBar seoTitle="Search">
