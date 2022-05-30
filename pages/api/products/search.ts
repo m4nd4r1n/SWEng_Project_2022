@@ -11,7 +11,7 @@ async function handler(
   res: NextApiResponse<ResponseType>
 ) {
   const {
-    query: { sort, catId },
+    query: { query, sort, catId },
   } = req;
 
   const sortOptions = {
@@ -46,6 +46,9 @@ async function handler(
           categoryId: +catId.toString() !== 0 ? +catId.toString() : undefined,
         },
       ],
+      name: {
+        contains: query as string,
+      },
     },
     orderBy: order,
     include: {
