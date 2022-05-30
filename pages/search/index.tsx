@@ -163,6 +163,11 @@ const Search: NextPage = () => {
           <input
             value={inputText}
             onChange={(e) => setinputText(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") {
+                setQuery(inputText);
+              }
+            }}
             className="flex w-full appearance-none border border-gray-300 px-3 py-2 placeholder-gray-400 shadow-sm focus:border-orange-500 focus:outline-none focus:ring-orange-500"
           />
           <button
