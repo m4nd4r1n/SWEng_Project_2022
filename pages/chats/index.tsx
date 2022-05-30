@@ -32,7 +32,10 @@ const Chats: NextPage = () => {
               <div className="h-12 w-12 rounded-full bg-slate-300" />
               <div>
                 <p className="text-gray-700">{list.join[0].user.name}</p>
-                <p className="text-sm  text-gray-500">{list?.lastMessage}</p>
+                <p className="text-sm  text-gray-500">
+                  {list?.lastMessage?.slice(0, 30)}
+                  {list?.lastMessage?.length! > 30 && "..."}
+                </p>
               </div>
             </a>
           </Link>
