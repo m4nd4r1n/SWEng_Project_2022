@@ -36,7 +36,10 @@ const ItemDetail: NextPage = () => {
   const [createOrFindChatRoom, { data: roomId }] = useMutation("/api/chats");
   const onChatClick = () => {
     if (!data) return;
-    createOrFindChatRoom({ userId: data.product.userId });
+    createOrFindChatRoom({
+      userId: data.product.userId,
+      productId: data.product.id,
+    });
   };
   useEffect(() => {
     if (roomId?.ok) {
