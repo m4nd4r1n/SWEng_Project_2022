@@ -9,6 +9,7 @@ import { Product } from "@prisma/client";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 import Image from "next/image";
+import { inNumber } from "@libs/client/utils";
 
 interface UploadProductForm {
   name: string;
@@ -104,6 +105,7 @@ const Upload: NextPage = () => {
           name="price"
           type="text"
           kind="price"
+          onChange={inNumber}
         />
         <TextArea
           register={register("description", { required: true })}

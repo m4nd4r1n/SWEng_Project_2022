@@ -1,5 +1,5 @@
 import { useRouter } from "next/router";
-import { useEffect } from "react";
+import { ChangeEvent, useEffect } from "react";
 
 export function cls(...classnames: string[]) {
   return classnames.join(" ");
@@ -17,3 +17,7 @@ export function Cleanup() {
     }
   }, [router]);
 }
+
+export const inNumber = (e: ChangeEvent<HTMLInputElement>) => {
+  e.target.value = e.target.value.replace(/[^0-9]/g, "");
+};
