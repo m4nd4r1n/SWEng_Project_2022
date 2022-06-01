@@ -25,28 +25,77 @@ interface WalletResponse {
 
 const Profile: NextPage = () => {
   const { user } = useUser();
-  const { data } = useSWR<ReviewsResponse>("/api/reviews");
   const { data: wallet } = useSWR<WalletResponse>("/api/users/me/wallet");
   return (
     <Layout hasTabBar title="나의 캐럿" seoTitle="Profile">
       <div className="px-4">
         <div className="mt-4 flex items-center space-x-3">
-          {user?.avatar ? (
-            <Image
-              src={`https://imagedelivery.net/aSbksvJjax-AUC7qVnaC4A/${user?.avatar}/avatar`}
-              className="h-16 w-16 rounded-full bg-slate-500"
-              alt=""
-              height={56}
-              width={56}
-            />
-          ) : (
-            <div className="h-16 w-16 rounded-full bg-slate-500" />
-          )}
-          <div className="flex flex-col">
-            <span className="font-medium text-gray-900">{user?.name}</span>
-            <Link href="/profile/edit">
-              <a className="text-sm text-gray-700">Edit profile &rarr;</a>
-            </Link>
+          <div>
+            {user?.avatar ? (
+              <Image
+                src={`https://imagedelivery.net/aSbksvJjax-AUC7qVnaC4A/${user?.avatar}/avatar`}
+                className="h-16 w-16 rounded-full bg-slate-500"
+                alt=""
+                height={56}
+                width={56}
+              />
+            ) : (
+              <div className="flex h-16 w-16 items-center justify-center rounded-full bg-slate-500">
+                <svg
+                  className="h-8 w-8 items-center justify-center"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="2"
+                    d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+                  ></path>
+                </svg>
+              </div>
+            )}
+          </div>
+          <div className="flex h-16 w-[465px] flex-col items-start justify-center pl-4 pr-10">
+            <span className="pb-2 font-bold text-gray-900">{user?.name}</span>
+            <div className="flex w-full justify-between">
+              <Link href={`/users/profiles/${user?.id}`}>
+                <a className="flex space-x-1 text-sm text-gray-400 hover:text-black">
+                  <span>상세정보</span>
+                  <div className="flex items-center justify-center">
+                    <svg
+                      fill="black"
+                      stroke="currentColor"
+                      xmlns="http://www.w3.org/2000/svg"
+                      viewBox="0 0 24 24"
+                      width="15px"
+                      height="15px"
+                    >
+                      <path d="M 12 2 C 6.4889971 2 2 6.4889971 2 12 C 2 17.511003 6.4889971 22 12 22 C 17.511003 22 22 17.511003 22 12 C 22 6.4889971 17.511003 2 12 2 z M 12 4 C 16.430123 4 20 7.5698774 20 12 C 20 16.430123 16.430123 20 12 20 C 7.5698774 20 4 16.430123 4 12 C 4 7.5698774 7.5698774 4 12 4 z M 11 7 L 11 9 L 13 9 L 13 7 L 11 7 z M 11 11 L 11 17 L 13 17 L 13 11 L 11 11 z" />
+                    </svg>
+                  </div>
+                </a>
+              </Link>
+              <Link href="/profile/edit">
+                <a className="flex space-x-1 text-sm text-gray-400 hover:text-black">
+                  <span>프로필 수정</span>
+                  <div className="flex items-center justify-center">
+                    <svg
+                      fill="black"
+                      stroke="currentColor"
+                      xmlns="http://www.w3.org/2000/svg"
+                      viewBox="0 0 24 24"
+                      width="15px"
+                      height="15px"
+                    >
+                      <path d="M 18.414062 2 C 18.158062 2 17.902031 2.0979687 17.707031 2.2929688 L 15.707031 4.2929688 L 14.292969 5.7070312 L 3 17 L 3 21 L 7 21 L 21.707031 6.2929688 C 22.098031 5.9019687 22.098031 5.2689063 21.707031 4.8789062 L 19.121094 2.2929688 C 18.926094 2.0979687 18.670063 2 18.414062 2 z M 18.414062 4.4140625 L 19.585938 5.5859375 L 18.292969 6.8789062 L 17.121094 5.7070312 L 18.414062 4.4140625 z M 15.707031 7.1210938 L 16.878906 8.2929688 L 6.171875 19 L 5 19 L 5 17.828125 L 15.707031 7.1210938 z" />
+                    </svg>
+                  </div>
+                </a>
+              </Link>
+            </div>
           </div>
         </div>
         <div className="mt-8 flex h-14 w-full justify-between rounded-lg border-2 border-orange-400">
@@ -137,70 +186,22 @@ const Profile: NextPage = () => {
             </a>
           </Link>
         </div>
-        {data?.reviews.map((review) => (
-          <div key={review.id} className="mt-12">
-            <div className="flex items-center space-x-4">
-              <div className="h-12 w-12 rounded-full bg-slate-500" />
-              <div>
-                <h4 className="text-sm font-bold text-gray-800">
-                  {review.createdBy.name}
-                </h4>
-                <div className="flex items-center">
-                  {[1, 2, 3, 4, 5].map((star) => (
-                    <svg
-                      key={star}
-                      className={cls(
-                        "h-5 w-5",
-                        review.score >= star
-                          ? "text-yellow-400"
-                          : "text-gray-400"
-                      )}
-                      xmlns="http://www.w3.org/2000/svg"
-                      viewBox="0 0 20 20"
-                      fill="currentColor"
-                      aria-hidden="true"
-                    >
-                      <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                    </svg>
-                  ))}
-                </div>
-              </div>
-            </div>
-            <div className="mt-4 text-sm text-gray-600">
-              <p>{review.review}</p>
-            </div>
-          </div>
-        ))}
       </div>
     </Layout>
   );
 };
 
-const Page: NextPage<{ profile: User }> = ({ profile }) => {
-  return (
-    <SWRConfig
-      value={{
-        fallback: {
-          "/api/users/me": { ok: true, profile },
-        },
-      }}
-    >
-      <Profile />
-    </SWRConfig>
-  );
-};
+// export const getServerSideProps = withSsrSession(async function ({
+//   req,
+// }: NextPageContext) {
+//   const profile = await client.user.findUnique({
+//     where: { id: req?.session.user?.id },
+//   });
+//   return {
+//     props: {
+//       profile: JSON.parse(JSON.stringify(profile)),
+//     },
+//   };
+// });
 
-export const getServerSideProps = withSsrSession(async function ({
-  req,
-}: NextPageContext) {
-  const profile = await client.user.findUnique({
-    where: { id: req?.session.user?.id },
-  });
-  return {
-    props: {
-      profile: JSON.parse(JSON.stringify(profile)),
-    },
-  };
-});
-
-export default Page;
+export default Profile;
