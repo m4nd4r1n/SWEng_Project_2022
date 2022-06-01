@@ -11,10 +11,10 @@ async function handler(
   if (req.method === "POST") {
     const {
       session: { user },
-      body: { userId },
+      body: { userId, productId },
     } = req;
 
-    if (!userId) res.status(400).json({ ok: false });
+    if (!userId || !productId) return res.status(400).json({ ok: false });
 
     const room = await client.room.findMany({
       select: {
@@ -25,6 +25,9 @@ async function handler(
           some: {
             userId,
           },
+        },
+        product: {
+          id: productId,
         },
       },
     });
@@ -38,6 +41,9 @@ async function handler(
             userId: user?.id,
           },
         },
+        product: {
+          id: productId,
+        },
       },
     });
     const id = myRoom?.find((data) => room?.find((id) => data.id === id.id));
@@ -48,6 +54,11 @@ async function handler(
           join: {
             createMany: {
               data: [{ userId }, { userId: user?.id }],
+            },
+          },
+          product: {
+            connect: {
+              id: productId,
             },
           },
         },

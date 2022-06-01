@@ -72,6 +72,7 @@ model Product {
   sales       Sale[]
   purchases   Purchase[]
   report      Report[]
+  Room        Room[]
 
   @@index([userId])
   @@index([categoryId])
@@ -255,7 +256,11 @@ model Room {
   id        Int      @id @default(autoincrement())
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+  product   Product  @relation(fields: [productId], references: [id])
+  productId Int
   join      Join[]
+
+  @@index([productId])
 }
 
 model Join {

@@ -9,10 +9,14 @@ interface Join {
     name: string;
   };
 }
+interface RequseMessage {
+  message: string;
+  isRequest: boolean;
+}
 interface RoomList {
   id: number;
   join: Array<Join>;
-  lastMessage?: string;
+  lastMessage?: string | RequseMessage;
 }
 
 interface ChatRoomListResponse {
@@ -33,8 +37,12 @@ const Chats: NextPage = () => {
               <div>
                 <p className="text-gray-700">{list.join[0].user.name}</p>
                 <p className="text-sm  text-gray-500">
-                  {list?.lastMessage?.slice(0, 30)}
-                  {list?.lastMessage?.length! > 30 && "..."}
+                  {typeof list.lastMessage === "string"
+                    ? list?.lastMessage?.slice(0, 30)
+                    : list.lastMessage?.message}
+                  {typeof list.lastMessage === "string" &&
+                    list?.lastMessage?.length! > 30 &&
+                    "..."}
                 </p>
               </div>
             </a>
