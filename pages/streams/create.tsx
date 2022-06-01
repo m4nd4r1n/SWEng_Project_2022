@@ -8,6 +8,7 @@ import useMutation from "@libs/client/useMutation";
 import { useEffect } from "react";
 import { useRouter } from "next/router";
 import { Stream } from "@prisma/client";
+import { inNumber } from "@libs/client/utils";
 
 interface CreateForm {
   name: string;
@@ -51,6 +52,7 @@ const Create: NextPage = () => {
           name="price"
           type="text"
           kind="price"
+          onChange={inNumber}
         />
         <TextArea
           register={register("description", { required: true })}

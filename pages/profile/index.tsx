@@ -17,8 +17,15 @@ interface ReviewsResponse {
   reviews: ReviewWithUser[];
 }
 
+interface WalletResponse {
+  ok: boolean;
+  id?: number;
+  currency?: number;
+}
+
 const Profile: NextPage = () => {
   const { user } = useUser();
+  const { data: wallet } = useSWR<WalletResponse>("/api/users/me/wallet");
   return (
     <Layout hasTabBar title="나의 캐럿" seoTitle="Profile">
       <div className="px-4">
@@ -90,6 +97,23 @@ const Profile: NextPage = () => {
               </Link>
             </div>
           </div>
+        </div>
+        <div className="mt-8 flex h-14 w-full justify-between rounded-lg border-2 border-orange-400">
+          <Link href="/profile/wallet">
+            <a className="flex w-full items-center">
+              <span className="select-none pl-4 font-bold text-orange-400">
+                Carrot Pay
+              </span>
+              <span className="select-none pl-4 font-bold text-gray-700">
+                {wallet?.currency}원
+              </span>
+            </a>
+          </Link>
+          <Link href="/profile/wallet/charge">
+            <a className="flex w-1/5 items-center justify-end">
+              <span className="select-none pr-4 text-gray-500">충전하기</span>
+            </a>
+          </Link>
         </div>
         <div className="mt-10 flex justify-around">
           <Link href="/profile/sold">

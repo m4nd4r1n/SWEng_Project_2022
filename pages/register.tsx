@@ -1,11 +1,12 @@
 import type { NextPage } from "next";
-import { ChangeEvent, useEffect } from "react";
+import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import Button from "@components/button";
 import Input from "@components/input";
 import useMutation from "@libs/client/useMutation";
 import { useRouter } from "next/router";
 import Link from "next/link";
+import { inNumber } from "@libs/client/utils";
 
 interface EnterForm {
   email: string;
@@ -43,9 +44,7 @@ const Register: NextPage = () => {
       router.push("/");
     }
   }, [data, router]);
-  const inNumber = (e: ChangeEvent<HTMLInputElement>) => {
-    e.target.value = e.target.value.replace(/[^0-9]/g, "");
-  };
+
   return (
     <div className="mx-auto w-full max-w-xl">
       <div className="mt-16 px-4">
