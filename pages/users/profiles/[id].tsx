@@ -1,171 +1,123 @@
 import type { NextPage, NextPageContext } from "next";
-import Link from "next/link";
 import Layout from "@components/layout";
 import useSWR, { SWRConfig } from "swr";
-import { Review, User } from "@prisma/client";
+import { Review, User, Product, Address } from "@prisma/client";
 import { cls } from "@libs/client/utils";
 import Image from "next/image";
+import { withSsrSession } from "@libs/server/withSession";
 import client from "@libs/server/client";
 import { GetServerSideProps } from "next";
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect } from "react";
 import "chart.js/auto";
-import { Doughnut, Pie } from "react-chartjs-2";
+import { Doughnut } from "react-chartjs-2";
+import { useRouter } from "next/router";
 
 interface ReviewWithUser extends Review {
   createdBy: User;
 }
+
 interface ReviewsResponse {
   ok: boolean;
   reviews: ReviewWithUser[];
 }
 
-const Profile: NextPage<{ profile: User }> = ({ profile }) => {
-  //const { data } = useSWR<ReviewsResponse>("/api/reviews");
-  const [meanScore, setMeanScore] = useState(0);
-  const reviews = useMemo(
-    () => [
-      {
-        id: 1,
-        review: "리뷰1",
-        score: 5,
-        createdBy: {
-          name: "김정폭",
-          avatar: null,
-        },
-      },
-      {
-        id: 2,
-        review: "리뷰2",
-        score: 2,
-        createdBy: {
-          name: "이으리",
-          avatar: null,
-        },
-      },
-      {
-        id: 3,
-        review: "리뷰3",
-        score: 3,
-        createdBy: {
-          name: "박시아",
-          avatar: null,
-        },
-      },
-      {
-        id: 4,
-        review: "리뷰4",
-        score: 4,
-        createdBy: {
-          name: "최명랑",
-          avatar: null,
-        },
-      },
-      {
-        id: 5,
-        review:
-          "매우매우긴리뷰5매우매우긴리뷰5매우매우긴리뷰5매우매우긴리뷰5매우매우긴리뷰5매우매우긴리뷰5매우매우긴리뷰5매우매우긴리뷰5",
-        score: 5,
-        createdBy: {
-          name: "신하늘",
-          avatar: null,
-        },
-      },
-    ],
-    []
-  );
-  const catData = {
-    datasets: [
-      {
-        data: [1, 2, 10, 1, 0, 0, 0, 0, 0, 0, 0],
-        borderRadius: 5,
-        backgroundColor: [
-          "#FF6384",
-          "#FF8C00",
-          "#36A2EB",
-          "#9ACD32",
-          "#FFCE56",
-          "#40E0D0",
-          "#7B68EE",
-          "#C71585",
-          "#B8860B",
-          "#663399",
-          "#191970",
-        ],
-        hoverBackgroundColor: [
-          "#FF6384",
-          "#FF8C00",
-          "#36A2EB",
-          "#9ACD32",
-          "#FFCE56",
-          "#40E0D0",
-          "#7B68EE",
-          "#C71585",
-          "#B8860B",
-          "#663399",
-          "#191970",
-        ],
-      },
-    ],
-    labels: [
-      "생활/건강",
-      "식품",
-      "디지털/가전",
-      "출산/육아",
-      "스포츠/레저",
-      "패션잡화",
-      "패션의류",
-      "가구/인테리어",
-      "도서",
-      "화장품/미용",
-      "여가/생활편의",
-    ],
-  };
+interface ProductWithAddressAndReviews extends Product {
+  address: Address;
+  receivedReviews: ReviewWithUser[];
+}
 
-  const addData = {
-    datasets: [
-      {
-        data: [15],
-        borderRadius: 5,
-        backgroundColor: [
-          "#FF6384",
-          "#FF8C00",
-          "#36A2EB",
-          "#9ACD32",
-          "#FFCE56",
-          "#40E0D0",
-          "#7B68EE",
-          "#C71585",
-          "#B8860B",
-          "#663399",
-          "#191970",
-        ],
-        hoverBackgroundColor: [
-          "#FF6384",
-          "#FF8C00",
-          "#36A2EB",
-          "#9ACD32",
-          "#FFCE56",
-          "#40E0D0",
-          "#7B68EE",
-          "#C71585",
-          "#B8860B",
-          "#663399",
-          "#191970",
-        ],
-      },
-    ],
-    labels: [
-      "경기 성남시 분당구",
-    ],
-  };
+interface ProfileWithProductAndReview extends User {
+  products: Array<ProductWithAddressAndReviews>;
+  receivedReviews: Array<ReviewWithUser>;
+}
+
+const catCount = (products: Array<ProductWithAddressAndReviews>) => [
+  products.filter((product) => product.categoryId === 10000).length,
+  products.filter((product) => product.categoryId === 20000).length,
+  products.filter((product) => product.categoryId === 30000).length,
+  products.filter((product) => product.categoryId === 40000).length,
+  products.filter((product) => product.categoryId === 50000).length,
+  products.filter((product) => product.categoryId === 60001).length,
+  products.filter((product) => product.categoryId === 60002).length,
+  products.filter((product) => product.categoryId === 60003).length,
+  products.filter((product) => product.categoryId === 70000).length,
+  products.filter((product) => product.categoryId === 80000).length,
+  products.filter((product) => product.categoryId === 90000).length,
+];
+
+const addCount = (
+  products: Array<ProductWithAddressAndReviews>,
+  addList: number[]
+) =>
+  addList.map(
+    (address) =>
+      products.filter((product) => product.addressId === address).length
+  );
+
+const CATEGORY = [
+  "생활/건강",
+  "식품",
+  "디지털/가전",
+  "출산/육아",
+  "스포츠/레저",
+  "패션잡화",
+  "패션의류",
+  "가구/인테리어",
+  "도서",
+  "화장품/미용",
+  "여가/생활편의",
+];
+
+const COLORS = [
+  "#FF6384",
+  "#FF8C00",
+  "#36A2EB",
+  "#9ACD32",
+  "#FFCE56",
+  "#40E0D0",
+  "#7B68EE",
+  "#C71585",
+  "#B8860B",
+  "#663399",
+  "#191970",
+];
+
+const Profile: NextPage<{ profile: ProfileWithProductAndReview }> = ({
+  profile,
+}) => {
+  const router = useRouter();
+  const { data } = useSWR<ReviewsResponse>(`/api/reviews/${router.query.id}`);
+  const [count, setCount] = useState<{
+    category: number[];
+    addList: { id: number; sido: string; sigungu: string }[];
+    address: number[];
+  }>({ category: [], addList: [], address: [] });
 
   useEffect(() => {
-    const score =
-      reviews
-        .map((review) => review.score)
-        .reduce((sum, currValue) => sum + currValue) / reviews.length;
-    setMeanScore(score);
-  }, [reviews]);
+    if (profile) {
+      const address = Array.from(
+        new Set(
+          profile?.products.map((product) => JSON.stringify(product.address))
+        )
+      ).map((product) => JSON.parse(product));
+      console.log(address);
+      console.log(
+        addCount(
+          profile?.products,
+          address.map((addr) => addr.id)
+        )
+      );
+      setCount((prev) => ({
+        ...prev,
+        category: catCount(profile?.products),
+        addList: address,
+        address: addCount(
+          profile?.products,
+          address.map((addr) => addr.id)
+        ),
+      }));
+    }
+  }, [profile]);
 
   return (
     <Layout hasTabBar title="사용자 정보" seoTitle="Profile">
@@ -181,7 +133,7 @@ const Profile: NextPage<{ profile: User }> = ({ profile }) => {
                 width={56}
               />
             ) : (
-              <div className="flex h-16 w-16 items-center justify-center rounded-full bg-slate-300">
+              <div className="flex h-16 w-16 items-center justify-center rounded-full bg-slate-500">
                 <svg
                   className="h-8 w-8 items-center justify-center"
                   fill="none"
@@ -207,31 +159,57 @@ const Profile: NextPage<{ profile: User }> = ({ profile }) => {
               <div className="flex w-full justify-between">
                 <div className="text-sm">
                   <span>등록 상품수</span>
-                  <span className="font-bold text-orange-600"> {10}</span>
+                  <span className="font-bold text-orange-600">
+                    {" "}
+                    {profile?.products.length}
+                  </span>
                 </div>
                 <div className="text-sm">
                   <span>평균 거래 만족도</span>
                   <span className="font-bold text-orange-600">
                     {" "}
-                    {meanScore}
+                    {(data?.reviews ?? profile?.receivedReviews)
+                      .map((review) => review?.score)
+                      .reduce((sum, currValue) => sum + currValue) /
+                      (data?.reviews ?? profile?.receivedReviews).length}
                   </span>
                 </div>
                 <div className="text-sm">
                   <span>거래 성사율</span>
-                  <span className="font-bold text-orange-600"> {82.5}%</span>
+                  <span className="font-bold text-orange-600">
+                    {" "}
+                    {(profile?.products
+                      .map((product) =>
+                        product?.onSale ? (0 as number) : (1 as number)
+                      )
+                      .reduce((sum, currValue) => sum + currValue) *
+                      100) /
+                      profile?.products.length}
+                    %
+                  </span>
                 </div>
               </div>
             </div>
           </div>
         </div>
-        <div className="flex border-b p-5 flex-row">
-          <div className="flex flex-col w-40 justify-center items-center">
+        <div className="flex flex-row border-b p-5">
+          <div className="flex w-40 flex-col items-center justify-center">
             <h2 className="mb-4 font-bold">등록 상품 품목</h2>
             <Doughnut
-                data={catData}
-                width={200}
-                height={200}
-                options={{
+              data={{
+                datasets: [
+                  {
+                    data: count?.category,
+                    borderRadius: 5,
+                    backgroundColor: COLORS,
+                    hoverBackgroundColor: COLORS,
+                  },
+                ],
+                labels: CATEGORY,
+              }}
+              width={200}
+              height={200}
+              options={{
                 plugins: {
                   legend: {
                     display: false,
@@ -240,29 +218,65 @@ const Profile: NextPage<{ profile: User }> = ({ profile }) => {
               }}
             />
           </div>
-          <div className="flex flex-row w-full justify-between items-center pt-8 px-12 space-x-12">
+          <div className="flex w-full flex-row items-center justify-between space-x-12 px-12 pt-8">
             <div className="flex flex-col space-y-2">
-              <span>디지털/가전</span>
-              <span>식품</span>
-              <span>생활/건강</span>
-              <span>출산/육아</span>
+              {count.category &&
+                count.category
+                  .map((count, index) => ({
+                    category: CATEGORY[index],
+                    count,
+                  }))
+                  .sort((a, b) => b.count - a.count)
+                  .map(
+                    (item, index) =>
+                      index < 4 &&
+                      item.count > 0 && <span key={index}>{item.category}</span>
+                  )}
             </div>
             <div className="flex flex-col justify-between space-y-2">
-              <span>{70}%</span>
-              <span>{10}%</span>
-              <span>{5}%</span>
-              <span>{5}%</span>
+              {count.category &&
+                count.category
+                  .map((count, index) => ({
+                    category: CATEGORY[index],
+                    count,
+                  }))
+                  .sort((a, b) => b.count - a.count)
+                  .map(
+                    (item, index) =>
+                      index < 4 &&
+                      item.count > 0 && (
+                        <span className="text-right" key={index}>
+                          {(
+                            (item.count * 100) /
+                            count.category.reduce((prev, curr) => prev + curr)
+                          ).toFixed(0)}
+                          %
+                        </span>
+                      )
+                  )}
             </div>
           </div>
         </div>
-        <div className="flex border-b p-5 flex-row">
-          <div className="flex flex-col w-40 justify-center items-center">
+        <div className="flex flex-row border-b p-5">
+          <div className="flex w-40 flex-col items-center justify-center">
             <h2 className="mb-4 font-bold">주요 거래 지역</h2>
             <Doughnut
-                data={addData}
-                width={200}
-                height={200}
-                options={{
+              data={{
+                datasets: [
+                  {
+                    data: count.address,
+                    borderRadius: 5,
+                    backgroundColor: COLORS,
+                    hoverBackgroundColor: COLORS,
+                  },
+                ],
+                labels: count.addList.map(
+                  (address) => address.sido + " " + address.sigungu
+                ),
+              }}
+              width={200}
+              height={200}
+              options={{
                 plugins: {
                   legend: {
                     display: false,
@@ -271,16 +285,50 @@ const Profile: NextPage<{ profile: User }> = ({ profile }) => {
               }}
             />
           </div>
-          <div className="flex flex-row w-full justify-between items-center pt-8 px-12 space-x-12">
+          <div className="flex w-full flex-row items-center justify-between space-x-12 px-12 pt-8">
             <div className="flex flex-col space-y-2">
-              <span>경기 성남시 분당구</span>
+              {count.address &&
+                count.address
+                  .map((cnt, index) => ({
+                    address: count.addList[index],
+                    cnt,
+                  }))
+                  .sort((a, b) => b.cnt - a.cnt)
+                  .map(
+                    (item, index) =>
+                      index < 4 &&
+                      item.cnt > 0 && (
+                        <span key={index}>
+                          {item.address.sido + " " + item.address.sigungu}
+                        </span>
+                      )
+                  )}
             </div>
             <div className="flex flex-col justify-between space-y-2">
-              <span>{100}%</span>
+              {count.address &&
+                count.address
+                  .map((cnt, index) => ({
+                    address: count.addList[index],
+                    cnt,
+                  }))
+                  .sort((a, b) => b.cnt - a.cnt)
+                  .map(
+                    (item, index) =>
+                      index < 4 &&
+                      item.cnt > 0 && (
+                        <span className="text-right" key={index}>
+                          {(
+                            (item.cnt * 100) /
+                            count.address.reduce((prev, curr) => prev + curr)
+                          ).toFixed(0)}
+                          %
+                        </span>
+                      )
+                  )}
             </div>
           </div>
         </div>
-        {reviews.map((review) => (
+        {(data?.reviews ?? profile?.receivedReviews).map((review) => (
           <div
             key={review.id}
             className="flex items-start space-x-2 border-b py-4"
@@ -295,7 +343,7 @@ const Profile: NextPage<{ profile: User }> = ({ profile }) => {
                   width={12}
                 />
               ) : (
-                <div className="flex h-12 w-12 items-center justify-center rounded-full bg-slate-300">
+                <div className="flex h-12 w-12 items-center justify-center rounded-full bg-slate-500">
                   <svg
                     className="h-6 w-6 items-center justify-center"
                     fill="none"
@@ -345,19 +393,54 @@ const Profile: NextPage<{ profile: User }> = ({ profile }) => {
   );
 };
 
-export const getServerSideProps: GetServerSideProps = async (context) => {
-  // get request id
-  const { id } = context.query;
+export const getServerSideProps: GetServerSideProps = withSsrSession(
+  async (context: NextPageContext) => {
+    // get request id
+    const { id } = context.query;
 
-  // Read profile with user id value
-  const profile = await client.user.findUnique({
-    where: { id: Number(id) },
-  });
-  return {
-    props: {
-      profile: JSON.parse(JSON.stringify(profile)),
-    },
-  };
-};
+    // Read profile with user id value
+    const profile = await client.user.findUnique({
+      where: { id: Number(id) },
+      include: {
+        login: {
+          select: {
+            email: true,
+          },
+        },
+        products: {
+          select: {
+            categoryId: true,
+            addressId: true,
+            onSale: true,
+            address: {
+              select: {
+                id: true,
+                sido: true,
+                sigungu: true,
+              },
+            },
+          },
+          orderBy: {
+            categoryId: "asc",
+          },
+        },
+        receivedReviews: {
+          include: {
+            createdBy: {
+              select: {
+                name: true,
+              },
+            },
+          },
+        },
+      },
+    });
+    return {
+      props: {
+        profile: JSON.parse(JSON.stringify(profile)),
+      },
+    };
+  }
+);
 
 export default Profile;
