@@ -2,6 +2,8 @@ import { NextApiRequest, NextApiResponse } from "next";
 import withHandler, { ResponseType } from "@libs/server/withHandler";
 import client from "@libs/server/client";
 import { withApiSession } from "@libs/server/withSession";
+import { find_category_name } from "components/category";
+
 
 async function handler(
   req: NextApiRequest,
@@ -24,9 +26,13 @@ async function handler(
   }
   if (req.method === "POST") {
     const {
-      body: { name, price, description, photoId },
+      body: { category, name, price, description, photoId },
       session: { user },
     } = req;
+
+    // convert category to number type
+    let cat = parseInt(category);
+
     const product = await client.product.create({
       data: {
         name,
@@ -38,6 +44,11 @@ async function handler(
             id: user?.id,
           },
         },
+        category: {
+          create:
+            {id: cat, name: find_category_name(cat)}
+        },
+        categoryId: cat,
       },
     });
     res.json({

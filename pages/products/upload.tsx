@@ -3,6 +3,7 @@ import Button from "@components/button";
 import Input from "@components/input";
 import Layout from "@components/layout";
 import TextArea from "@components/textarea";
+import Category from "@components/category";
 import { useForm } from "react-hook-form";
 import useMutation from "@libs/client/useMutation";
 import { Product } from "@prisma/client";
@@ -12,6 +13,7 @@ import Image from "next/image";
 import { inNumber } from "@libs/client/utils";
 
 interface UploadProductForm {
+  category: number;
   name: string;
   price: string;
   description: string;
@@ -28,7 +30,7 @@ const Upload: NextPage = () => {
   const { register, handleSubmit, watch } = useForm<UploadProductForm>();
   const [uploadProduct, { loading, data }] =
     useMutation<UploadProductMutation>("/api/products");
-  const onValid = async ({ name, price, description }: UploadProductForm) => {
+  const onValid = async ({ category, name, price, description }: UploadProductForm) => {
     if (loading) return;
     if (photo && photo.length > 0) {
       const { uploadURL } = await (await fetch(`/api/files`)).json();
@@ -37,9 +39,9 @@ const Upload: NextPage = () => {
       const {
         result: { id },
       } = await (await fetch(uploadURL, { method: "POST", body: form })).json();
-      uploadProduct({ name, price, description, photoId: id });
+      uploadProduct({ category, name, price, description, photoId: id });
     } else {
-      uploadProduct({ name, price, description });
+      uploadProduct({ category, name, price, description });
     }
   };
   useEffect(() => {
@@ -91,6 +93,13 @@ const Upload: NextPage = () => {
             </label>
           )}
         </div>
+        {/* 카테고리 입력 */}
+        <Category
+          register={register("category", { required: true })}
+          label="Category"
+          name="category"
+          required
+        />
         <Input
           register={register("name", { required: true })}
           required
