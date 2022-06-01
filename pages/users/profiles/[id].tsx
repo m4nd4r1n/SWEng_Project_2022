@@ -195,142 +195,152 @@ const Profile: NextPage<{ profile: ProfileWithProductAndReview }> = ({
             </div>
           </div>
         </div>
-        <div className="flex flex-row border-b p-5">
-          <div className="flex w-40 flex-col items-center justify-center">
-            <h2 className="mb-4 font-bold">등록 상품 품목</h2>
-            <Doughnut
-              data={{
-                datasets: [
-                  {
-                    data: count?.category,
-                    borderRadius: 5,
-                    backgroundColor: COLORS,
-                    hoverBackgroundColor: COLORS,
-                  },
-                ],
-                labels: CATEGORY,
-              }}
-              width={200}
-              height={200}
-              options={{
-                plugins: {
-                  legend: {
-                    display: false,
-                  },
-                },
-              }}
-            />
-          </div>
-          <div className="flex w-full flex-row items-center justify-between space-x-12 px-12 pt-8">
-            <div className="flex flex-col space-y-2">
-              {count.category &&
-                count.category
-                  .map((count, index) => ({
-                    category: CATEGORY[index],
-                    count,
-                  }))
-                  .sort((a, b) => b.count - a.count)
-                  .map(
-                    (item, index) =>
-                      index < 4 &&
-                      item.count > 0 && <span key={index}>{item.category}</span>
-                  )}
+        {profile?.products.length !== 0 && (
+          <>
+            <div className="flex flex-row border-b p-5">
+              <div className="flex w-40 flex-col items-center justify-center">
+                <h2 className="mb-4 font-bold">등록 상품 품목</h2>
+                <Doughnut
+                  data={{
+                    datasets: [
+                      {
+                        data: count?.category,
+                        borderRadius: 5,
+                        backgroundColor: COLORS,
+                        hoverBackgroundColor: COLORS,
+                      },
+                    ],
+                    labels: CATEGORY,
+                  }}
+                  width={200}
+                  height={200}
+                  options={{
+                    plugins: {
+                      legend: {
+                        display: false,
+                      },
+                    },
+                  }}
+                />
+              </div>
+              <div className="flex w-full flex-row items-center justify-between space-x-12 px-12 pt-8">
+                <div className="flex flex-col space-y-2">
+                  {count.category &&
+                    count.category
+                      .map((count, index) => ({
+                        category: CATEGORY[index],
+                        count,
+                      }))
+                      .sort((a, b) => b.count - a.count)
+                      .map(
+                        (item, index) =>
+                          index < 4 &&
+                          item.count > 0 && (
+                            <span key={index}>{item.category}</span>
+                          )
+                      )}
+                </div>
+                <div className="flex flex-col justify-between space-y-2">
+                  {count.category &&
+                    count.category
+                      .map((count, index) => ({
+                        category: CATEGORY[index],
+                        count,
+                      }))
+                      .sort((a, b) => b.count - a.count)
+                      .map(
+                        (item, index) =>
+                          index < 4 &&
+                          item.count > 0 && (
+                            <span className="text-right" key={index}>
+                              {(
+                                (item.count * 100) /
+                                count.category.reduce(
+                                  (prev, curr) => prev + curr
+                                )
+                              ).toFixed(0)}
+                              %
+                            </span>
+                          )
+                      )}
+                </div>
+              </div>
             </div>
-            <div className="flex flex-col justify-between space-y-2">
-              {count.category &&
-                count.category
-                  .map((count, index) => ({
-                    category: CATEGORY[index],
-                    count,
-                  }))
-                  .sort((a, b) => b.count - a.count)
-                  .map(
-                    (item, index) =>
-                      index < 4 &&
-                      item.count > 0 && (
-                        <span className="text-right" key={index}>
-                          {(
-                            (item.count * 100) /
-                            count.category.reduce((prev, curr) => prev + curr)
-                          ).toFixed(0)}
-                          %
-                        </span>
-                      )
-                  )}
+            <div className="flex flex-row border-b p-5">
+              <div className="flex w-40 flex-col items-center justify-center">
+                <h2 className="mb-4 font-bold">주요 거래 지역</h2>
+                <Doughnut
+                  data={{
+                    datasets: [
+                      {
+                        data: count.address,
+                        borderRadius: 5,
+                        backgroundColor: COLORS,
+                        hoverBackgroundColor: COLORS,
+                      },
+                    ],
+                    labels: count.addList.map(
+                      (address) => address.sido + " " + address.sigungu
+                    ),
+                  }}
+                  width={200}
+                  height={200}
+                  options={{
+                    plugins: {
+                      legend: {
+                        display: false,
+                      },
+                    },
+                  }}
+                />
+              </div>
+              <div className="flex w-full flex-row items-center justify-between space-x-12 px-12 pt-8">
+                <div className="flex flex-col space-y-2">
+                  {count.address &&
+                    count.address
+                      .map((cnt, index) => ({
+                        address: count.addList[index],
+                        cnt,
+                      }))
+                      .sort((a, b) => b.cnt - a.cnt)
+                      .map(
+                        (item, index) =>
+                          index < 4 &&
+                          item.cnt > 0 && (
+                            <span key={index}>
+                              {item.address.sido + " " + item.address.sigungu}
+                            </span>
+                          )
+                      )}
+                </div>
+                <div className="flex flex-col justify-between space-y-2">
+                  {count.address &&
+                    count.address
+                      .map((cnt, index) => ({
+                        address: count.addList[index],
+                        cnt,
+                      }))
+                      .sort((a, b) => b.cnt - a.cnt)
+                      .map(
+                        (item, index) =>
+                          index < 4 &&
+                          item.cnt > 0 && (
+                            <span className="text-right" key={index}>
+                              {(
+                                (item.cnt * 100) /
+                                count.address.reduce(
+                                  (prev, curr) => prev + curr
+                                )
+                              ).toFixed(0)}
+                              %
+                            </span>
+                          )
+                      )}
+                </div>
+              </div>
             </div>
-          </div>
-        </div>
-        <div className="flex flex-row border-b p-5">
-          <div className="flex w-40 flex-col items-center justify-center">
-            <h2 className="mb-4 font-bold">주요 거래 지역</h2>
-            <Doughnut
-              data={{
-                datasets: [
-                  {
-                    data: count.address,
-                    borderRadius: 5,
-                    backgroundColor: COLORS,
-                    hoverBackgroundColor: COLORS,
-                  },
-                ],
-                labels: count.addList.map(
-                  (address) => address.sido + " " + address.sigungu
-                ),
-              }}
-              width={200}
-              height={200}
-              options={{
-                plugins: {
-                  legend: {
-                    display: false,
-                  },
-                },
-              }}
-            />
-          </div>
-          <div className="flex w-full flex-row items-center justify-between space-x-12 px-12 pt-8">
-            <div className="flex flex-col space-y-2">
-              {count.address &&
-                count.address
-                  .map((cnt, index) => ({
-                    address: count.addList[index],
-                    cnt,
-                  }))
-                  .sort((a, b) => b.cnt - a.cnt)
-                  .map(
-                    (item, index) =>
-                      index < 4 &&
-                      item.cnt > 0 && (
-                        <span key={index}>
-                          {item.address.sido + " " + item.address.sigungu}
-                        </span>
-                      )
-                  )}
-            </div>
-            <div className="flex flex-col justify-between space-y-2">
-              {count.address &&
-                count.address
-                  .map((cnt, index) => ({
-                    address: count.addList[index],
-                    cnt,
-                  }))
-                  .sort((a, b) => b.cnt - a.cnt)
-                  .map(
-                    (item, index) =>
-                      index < 4 &&
-                      item.cnt > 0 && (
-                        <span className="text-right" key={index}>
-                          {(
-                            (item.cnt * 100) /
-                            count.address.reduce((prev, curr) => prev + curr)
-                          ).toFixed(0)}
-                          %
-                        </span>
-                      )
-                  )}
-            </div>
-          </div>
-        </div>
+          </>
+        )}
         {(data?.reviews ?? profile?.receivedReviews).map((review) => (
           <div
             key={review.id}
