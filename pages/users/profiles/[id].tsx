@@ -170,21 +170,24 @@ const Profile: NextPage<{ profile: ProfileWithProductAndReview }> = ({
                     {" "}
                     {(data?.reviews ?? profile?.receivedReviews)
                       .map((review) => review?.score)
-                      .reduce((sum, currValue) => sum + currValue) /
-                      (data?.reviews ?? profile?.receivedReviews).length}
+                      .reduce((sum, currValue) => sum + currValue, 0) /
+                      ((data?.reviews ?? profile?.receivedReviews).length || 1)}
                   </span>
                 </div>
                 <div className="text-sm">
                   <span>거래 성사율</span>
                   <span className="font-bold text-orange-600">
                     {" "}
-                    {(profile?.products
-                      .map((product) =>
-                        product?.onSale ? (0 as number) : (1 as number)
-                      )
-                      .reduce((sum, currValue) => sum + currValue) *
-                      100) /
-                      profile?.products.length}
+                    {Math.round(
+                      ((profile?.products
+                        .map((product) =>
+                          product?.onSale ? (0 as number) : (1 as number)
+                        )
+                        .reduce((sum, currValue) => sum + currValue, 0) *
+                        100) /
+                        (profile?.products.length || 1)) *
+                        10
+                    ) / 10}
                     %
                   </span>
                 </div>
