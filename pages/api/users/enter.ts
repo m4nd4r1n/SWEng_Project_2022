@@ -18,15 +18,27 @@ async function handler(
       email,
       password,
     },
+    include: {
+      user: {
+        include: {
+          manager: true,
+        },
+      },
+    },
   });
 
   if (!foundLoginInfo) {
     return res
       .status(401)
       .json({ ok: false, error: "E-mail or password is invalid" });
+  } else if (foundLoginInfo.user.disabled) {
+    return res
+      .status(401)
+      .json({ ok: false, error: "Your account has been suspended" });
   } else {
     req.session.user = {
       id: foundLoginInfo.userId,
+      manager: Boolean(foundLoginInfo?.user?.manager),
     };
     await req.session.save();
     return res.json({

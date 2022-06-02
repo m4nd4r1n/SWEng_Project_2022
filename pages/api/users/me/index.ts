@@ -16,6 +16,7 @@ async function handler(
             email: true,
           },
         },
+        manager: true,
       },
     });
     res.json({
