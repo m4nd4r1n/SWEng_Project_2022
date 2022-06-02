@@ -19,13 +19,13 @@ interface UsersResponse {
 }
 
 const Users: NextPage = () => {
-  const { user, isLoading } = useUser();
+  const { user: me, isLoading } = useUser();
   const { mutate } = useSWRConfig();
   const { data } = useSWR<UsersResponse>("/api/users/all");
   const [query, setQuery] = useState("");
 
   return (
-    <Layout title="계정 관리" hasTabBar canGoBack seoTitle="Management">
+    <Layout title="계정 관리" hasTabBar={false} canGoBack seoTitle="Management">
       <div className="fixed -mt-4 flex w-full min-w-max max-w-[576px] flex-col border-b bg-white">
         <div
           id="search"
@@ -34,7 +34,7 @@ const Users: NextPage = () => {
           <input
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            className="flex w-full appearance-none border border-gray-300 px-3 py-2 placeholder-gray-400 shadow-sm focus:border-orange-500 focus:outline-none focus:ring-orange-500"
+            className="flex w-full appearance-none rounded-lg border border-gray-300 px-3 py-2 placeholder-gray-400 shadow-sm focus:border-orange-500 focus:outline-none focus:ring-orange-500"
             placeholder="계정 검색"
           />
         </div>
@@ -56,17 +56,19 @@ const Users: NextPage = () => {
                 >
                   <div>
                     {user?.avatar ? (
-                      <Image
-                        src={`https://imagedelivery.net/aSbksvJjax-AUC7qVnaC4A/${user?.avatar}/avatar`}
-                        className="h-16 w-16 rounded-full bg-slate-500"
-                        alt=""
-                        height={56}
-                        width={56}
-                      />
+                      <div className="flex h-16 w-16 items-center justify-center">
+                        <Image
+                          src={`https://imagedelivery.net/mBDIPXvPr-qhWpouLgwjOQ/${user?.avatar}/avatar`}
+                          className="rounded-full bg-slate-500"
+                          alt=""
+                          height={64}
+                          width={64}
+                        />
+                      </div>
                     ) : (
                       <div className="flex h-16 w-16 items-center justify-center rounded-full bg-slate-500">
                         <svg
-                          className="h-8 w-8 items-center justify-center"
+                          className="h-8 w-8"
                           fill="none"
                           stroke="currentColor"
                           viewBox="0 0 24 24"
@@ -118,7 +120,7 @@ const Users: NextPage = () => {
                         )}
                       </div>
                     </div>
-                    <div className="flex w-1/2 items-center justify-end space-x-12">
+                    <div className="grid w-1/2 grid-cols-2">
                       <Link href={`/users/profiles/${user?.id}`}>
                         <a className="flex items-center justify-center text-gray-400 hover:text-black">
                           <svg
@@ -133,70 +135,71 @@ const Users: NextPage = () => {
                           </svg>
                         </a>
                       </Link>
-                      {user?.disabled ? (
-                        <div
-                          className="flex items-center justify-center text-gray-400 hover:text-black"
-                          onClick={() => {
-                            if (
-                              window.confirm(
-                                `${user?.name}의 계정을 복원시키겠습니까?`
-                              )
-                            ) {
-                              fetch(
-                                `/api/users/management/enable/${user?.id}`,
-                                {
-                                  method: "POST",
-                                }
-                              ).then(() => mutate(`/api/users/all`));
-                            }
-                          }}
-                        >
-                          <svg
-                            stroke="currentColor"
-                            fill="currentColor"
-                            width="50px"
-                            height="50px"
-                            viewBox="0 0 32 32"
-                            id="icon"
-                            xmlns="http://www.w3.org/2000/svg"
+                      {user.id !== me?.id &&
+                        (user?.disabled ? (
+                          <div
+                            className="flex items-center justify-center text-gray-400 hover:text-black"
+                            onClick={() => {
+                              if (
+                                window.confirm(
+                                  `${user?.name}의 계정을 복원시키겠습니까?`
+                                )
+                              ) {
+                                fetch(
+                                  `/api/users/management/enable/${user?.id}`,
+                                  {
+                                    method: "POST",
+                                  }
+                                ).then(() => mutate(`/api/users/all`));
+                              }
+                            }}
                           >
-                            <path d="M18,28A12,12,0,1,0,6,16v6.2L2.4,18.6,1,20l6,6,6-6-1.4-1.4L8,22.2V16H8A10,10,0,1,1,18,26Z" />
-                          </svg>
-                        </div>
-                      ) : (
-                        <div
-                          className="flex items-center justify-center text-gray-400 hover:text-red-600"
-                          onClick={() => {
-                            if (
-                              window.confirm(
-                                `${user?.name}의 계정을 정지시키겠습니까?`
-                              )
-                            ) {
-                              fetch(
-                                `/api/users/management/disable/${user?.id}`,
-                                {
-                                  method: "POST",
-                                }
-                              ).then(() => mutate(`/api/users/all`));
-                            }
-                          }}
-                        >
-                          <svg
-                            stroke="currentColor"
-                            fill="currentColor"
-                            xmlns="http://www.w3.org/2000/svg"
-                            viewBox="0 0 48 48"
-                            width="50px"
-                            height="50px"
+                            <svg
+                              stroke="currentColor"
+                              fill="currentColor"
+                              width="50px"
+                              height="50px"
+                              viewBox="0 0 32 32"
+                              id="icon"
+                              xmlns="http://www.w3.org/2000/svg"
+                            >
+                              <path d="M18,28A12,12,0,1,0,6,16v6.2L2.4,18.6,1,20l6,6,6-6-1.4-1.4L8,22.2V16H8A10,10,0,1,1,18,26Z" />
+                            </svg>
+                          </div>
+                        ) : (
+                          <div
+                            className="flex items-center justify-center text-gray-400 hover:text-red-600"
+                            onClick={() => {
+                              if (
+                                window.confirm(
+                                  `${user?.name}의 계정을 정지시키겠습니까?`
+                                )
+                              ) {
+                                fetch(
+                                  `/api/users/management/disable/${user?.id}`,
+                                  {
+                                    method: "POST",
+                                  }
+                                ).then(() => mutate(`/api/users/all`));
+                              }
+                            }}
                           >
-                            <path
-                              d="M5.7 22H42.5V26H5.7z"
-                              transform="rotate(-45.001 24.036 24.037)"
-                            />
-                            <path d="M24,4C13,4,4,13,4,24s9,20,20,20s20-9,20-20S35,4,24,4z M24,40c-8.8,0-16-7.2-16-16S15.2,8,24,8 s16,7.2,16,16S32.8,40,24,40z" />
-                          </svg>
-                        </div>
-                      )}
+                            <svg
+                              stroke="currentColor"
+                              fill="currentColor"
+                              xmlns="http://www.w3.org/2000/svg"
+                              viewBox="0 0 48 48"
+                              width="50px"
+                              height="50px"
+                            >
+                              <path
+                                d="M5.7 22H42.5V26H5.7z"
+                                transform="rotate(-45.001 24.036 24.037)"
+                              />
+                              <path d="M24,4C13,4,4,13,4,24s9,20,20,20s20-9,20-20S35,4,24,4z M24,40c-8.8,0-16-7.2-16-16S15.2,8,24,8 s16,7.2,16,16S32.8,40,24,40z" />
+                            </svg>
+                          </div>
+                        ))}
                     </div>
                   </div>
                 </div>
