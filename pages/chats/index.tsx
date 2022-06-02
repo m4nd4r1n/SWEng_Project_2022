@@ -2,21 +2,23 @@ import type { NextPage } from "next";
 import Link from "next/link";
 import Layout from "@components/layout";
 import useSWR from "swr";
+import Image from "next/image";
 
 interface Join {
   user: {
     id: number;
     name: string;
+    avatar?: string;
   };
 }
-interface RequseMessage {
+interface RequestMessage {
   message: string;
   isRequest: boolean;
 }
 interface RoomList {
   id: number;
-  join: Array<Join>;
-  lastMessage?: string | RequseMessage;
+  join: Join[];
+  lastMessage?: string | RequestMessage;
 }
 
 interface ChatRoomListResponse {
@@ -33,7 +35,17 @@ const Chats: NextPage = () => {
         {data?.roomList?.map((list, i) => (
           <Link href={`/chats/${list.id}`} key={i}>
             <a className="flex cursor-pointer items-center space-x-3 px-4 py-3">
-              <div className="h-12 w-12 rounded-full bg-slate-300" />
+              {list.join[0].user.avatar ? (
+                <Image
+                  src={`https://imagedelivery.net/mBDIPXvPr-qhWpouLgwjOQ/${list.join[0].user.avatar}/avatar`}
+                  className="h-12 w-12 rounded-full bg-slate-300"
+                  alt=""
+                  height={48}
+                  width={48}
+                />
+              ) : (
+                <div className="h-12 w-12 rounded-full bg-slate-300" />
+              )}
               <div>
                 <p className="text-gray-700">{list.join[0].user.name}</p>
                 <p className="text-sm  text-gray-500">
