@@ -50,17 +50,17 @@ const ItemDetail: NextPage = () => {
     <Layout canGoBack seoTitle="Product Detail">
       <div className="px-4  py-4">
         <div className="mb-8">
-          <div className="relative  pb-80">
+          <div className="relative pb-80">
             <Image
-              src={`https://imagedelivery.net/aSbksvJjax-AUC7qVnaC4A/${data?.product.image}/public`}
-              className="bg-slate-300 object-cover"
+              src={`https://imagedelivery.net/mBDIPXvPr-qhWpouLgwjOQ/${data?.product.image}/public`}
+              className="bg-slate-100 object-contain"
               layout="fill"
               alt=""
             />
           </div>
           <div className="flex cursor-pointer items-center space-x-3 border-t border-b py-3">
             <Image
-              src={`https://imagedelivery.net/aSbksvJjax-AUC7qVnaC4A/${data?.product?.user?.avatar}/avatar`}
+              src={`https://imagedelivery.net/mBDIPXvPr-qhWpouLgwjOQ/${data?.product?.user?.avatar}/avatar`}
               className="h-12 w-12 rounded-full bg-slate-300"
               alt=""
               height={48}
@@ -156,8 +156,23 @@ const ItemDetail: NextPage = () => {
           <h2 className="text-2xl font-bold text-gray-900">Similar items</h2>
           <div className=" mt-6 grid grid-cols-2 gap-4">
             {data?.relatedProducts?.map((product) => (
-              <div key={product.id}>
-                <div className="mb-4 h-56 w-full bg-slate-300" />
+              <div
+                key={product.id}
+                className="h-56 w-full cursor-pointer"
+                onClick={() => router.push(`/products/${product.id}`)}
+              >
+                {product.image ? (
+                  <Image
+                    className="mb-4"
+                    src={`https://imagedelivery.net/mBDIPXvPr-qhWpouLgwjOQ/${product.image}/public`}
+                    width={264}
+                    height={224}
+                    objectFit="contain"
+                    alt=""
+                  />
+                ) : (
+                  <div className="mb-4 h-56 w-full bg-slate-300" />
+                )}
                 <h3 className="-mb-1 text-gray-700">{product.name}</h3>
                 <span className="text-sm font-medium text-gray-900">
                   ${product.price}
@@ -165,7 +180,7 @@ const ItemDetail: NextPage = () => {
               </div>
             ))}
             {!data &&
-              [1, 2, 3, 4].map((_, i) => (
+              [1, 2].map((_, i) => (
                 <div key={i}>
                   <div className="mb-4 h-56 w-full animate-pulse rounded-md bg-slate-300" />
                   <div className="-mb-1 h-8 animate-pulse rounded-md bg-slate-300" />

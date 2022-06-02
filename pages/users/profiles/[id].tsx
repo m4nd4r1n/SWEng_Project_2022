@@ -126,7 +126,7 @@ const Profile: NextPage<{ profile: ProfileWithProductAndReview }> = ({
           <div>
             {profile?.avatar ? (
               <Image
-                src={`https://imagedelivery.net/aSbksvJjax-AUC7qVnaC4A/${profile?.avatar}/avatar`}
+                src={`https://imagedelivery.net/mBDIPXvPr-qhWpouLgwjOQ/${profile?.avatar}/avatar`}
                 className="h-16 w-16 rounded-full bg-slate-500"
                 alt=""
                 height={56}
@@ -349,7 +349,7 @@ const Profile: NextPage<{ profile: ProfileWithProductAndReview }> = ({
             <div>
               {review?.createdBy?.avatar ? (
                 <Image
-                  src={`https://imagedelivery.net/aSbksvJjax-AUC7qVnaC4A/${profile?.avatar}/avatar`}
+                  src={`https://imagedelivery.net/mBDIPXvPr-qhWpouLgwjOQ/${profile?.avatar}/avatar`}
                   className="h-12 w-12 rounded-full bg-slate-500"
                   alt=""
                   height={12}

@@ -1,4 +1,4 @@
-import { ChangeEvent, useMemo, useState, useEffect } from "react";
+import { useState } from "react";
 import type { NextPage } from "next";
 import FloatingButton from "@components/floating-button";
 import Item from "@components/item";
@@ -7,54 +7,12 @@ import useUser from "@libs/client/useUser";
 import useSWR, { SWRConfig } from "swr";
 import { ProductWithCount } from "../index";
 import qs from "qs";
+import Dropdown from "@components/dropdown";
 
 interface ProductsResponse {
   ok: boolean;
   products: ProductWithCount[];
 }
-
-const Dropdown = ({
-  options,
-  spaceholder,
-  handleChangeSelect,
-}: {
-  options: Array<{ name: string; value: string }>;
-  spaceholder?: string;
-  handleChangeSelect?: (event: ChangeEvent<HTMLSelectElement>) => void;
-}) => {
-  return (
-    <select
-      id="dropdownDefault"
-      className="form-select m-0
-        mx-5
-        block
-        w-1/2
-        appearance-none
-        border
-        border-solid
-        border-gray-300 bg-white bg-clip-padding
-        bg-no-repeat px-4
-        py-2.5
-        text-base
-        font-medium
-        text-gray-700
-        transition ease-in-out hover:border-orange-400 focus:border-orange-400 focus:bg-white
-        focus:text-gray-700 focus:outline-none
-        focus:ring-2
-        focus:ring-orange-200"
-      onChange={handleChangeSelect}
-    >
-      <option className="bg-orange-100 font-semibold" value="">
-        {spaceholder}
-      </option>
-      {options.map((item, index) => (
-        <option key={index} value={item.value}>
-          {item?.name}
-        </option>
-      ))}
-    </select>
-  );
-};
 
 const Search: NextPage = () => {
   const { user, isLoading } = useUser();
@@ -66,78 +24,6 @@ const Search: NextPage = () => {
     `/api/products/search?${qs.stringify({ query, sort, catId })}`
   );
 
-  const categories = useMemo(
-    () => [
-      {
-        name: "생활/건강",
-        value: "10000",
-      },
-      {
-        name: "식품",
-        value: "20000",
-      },
-      {
-        name: "디지털/가전",
-        value: "30000",
-      },
-      {
-        name: "출산/육아",
-        value: "40000",
-      },
-      {
-        name: "스포츠/레저",
-        value: "50000",
-      },
-      {
-        name: "패션잡화",
-        value: "60001",
-      },
-      {
-        name: "패션의류",
-        value: "60002",
-      },
-      {
-        name: "가구/인테리어",
-        value: "70000",
-      },
-      {
-        name: "도서",
-        value: "80000",
-      },
-      {
-        name: "화장품/미용",
-        value: "60003",
-      },
-      {
-        name: "여가/생활편의",
-        value: "90000",
-      },
-    ],
-    []
-  );
-
-  const options = useMemo(
-    () => [
-      {
-        name: "낮은 가격순",
-        value: "price_asc",
-      },
-      {
-        name: "높은 가격순",
-        value: "price_dsc",
-      },
-      {
-        name: "좋아요순",
-        value: "fav",
-      },
-      {
-        name: "등록일순",
-        value: "date",
-      },
-    ],
-    []
-  );
-
   return (
     <Layout title="검색" hasTabBar seoTitle="Search">
       <div className="fixed -mt-4 flex w-full min-w-max max-w-[576px] flex-col border-b bg-white">
@@ -146,12 +32,12 @@ const Search: NextPage = () => {
           className="flex w-full items-center justify-around pt-4 pb-4"
         >
           <Dropdown
-            options={categories}
+            type="category"
             spaceholder="카테고리"
             handleChangeSelect={(e) => setCatId(e.target.value)}
           />
           <Dropdown
-            options={options}
+            type="option"
             spaceholder="정렬 옵션"
             handleChangeSelect={(e) => setSort(e.target.value)}
           />
@@ -168,11 +54,11 @@ const Search: NextPage = () => {
                 setQuery(inputText);
               }
             }}
-            className="flex w-full appearance-none border border-gray-300 px-3 py-2 placeholder-gray-400 shadow-sm focus:border-orange-500 focus:outline-none focus:ring-orange-500"
+            className="flex w-full appearance-none rounded-l-lg border border-gray-300 px-3 py-2 placeholder-gray-400 shadow-sm focus:border-orange-500 focus:outline-none focus:ring-orange-500"
           />
           <button
             onClick={() => setQuery(inputText)}
-            className="flex h-[42px] min-w-[50px] items-center justify-center bg-orange-400 hover:ring-2 hover:ring-orange-200"
+            className="flex h-[42px] min-w-[50px] items-center justify-center rounded-r-lg bg-orange-400 hover:ring-2 hover:ring-orange-200"
           >
             <svg
               className="h-5 w-5 transition-colors"
@@ -199,6 +85,7 @@ const Search: NextPage = () => {
                 title={product.name}
                 price={product.price}
                 hearts={product._count?.favs || 0}
+                image={product.image}
               />
             ))
           : "Loading..."}
