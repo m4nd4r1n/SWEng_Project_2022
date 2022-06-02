@@ -11,9 +11,10 @@ import ModalBase from "@components/modal";
 import { CardModal } from "@components/cardModal";
 import useMutation from "@libs/client/useMutation";
 
-interface Username {
+interface User {
   name: string;
   id: number;
+  avatar: string;
 }
 
 interface Product {
@@ -31,7 +32,7 @@ interface RoomWithProduct {
 
 interface ParticipantResponse {
   ok: boolean;
-  user?: Username;
+  user?: User;
   room?: RoomWithProduct;
 }
 
@@ -112,14 +113,16 @@ const ChatDetail: NextPage = () => {
   };
 
   const messages = receivedMessages.map((message, index) => {
+    const isMine = message.name === user?.login.email;
     return (
       <Message
         key={index}
         message={message.data?.isRequest ? message.data?.message : message.data}
-        reversed={message.name === user?.login.email}
+        reversed={isMine}
         purchase={message.data?.isRequest}
         onClick={sellProduct}
         isSale={data?.room?.product.onSale}
+        avatarUrl={isMine ? user.avatar! : data?.user?.avatar}
       />
     );
   });
