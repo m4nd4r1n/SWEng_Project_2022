@@ -3,17 +3,17 @@ import Button from "@components/button";
 import Input from "@components/input";
 import Layout from "@components/layout";
 import TextArea from "@components/textarea";
-import Category from "@components/category";
 import { useForm } from "react-hook-form";
 import useMutation from "@libs/client/useMutation";
 import { Product } from "@prisma/client";
 import { useRouter } from "next/router";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import { inNumber } from "@libs/client/utils";
+import useAddress from "@libs/client/useAddress";
+import Dropdown from "@components/dropdown";
 
 interface UploadProductForm {
-  category: number;
   name: string;
   price: string;
   description: string;
@@ -27,11 +27,23 @@ interface UploadProductMutation {
 
 const Upload: NextPage = () => {
   const router = useRouter();
+  const { id: addressId, sido, sigungu } = useAddress();
+  const [catId, setCatId] = useState("");
+  const selectRef = useRef<HTMLSelectElement>(null);
   const { register, handleSubmit, watch } = useForm<UploadProductForm>();
   const [uploadProduct, { loading, data }] =
     useMutation<UploadProductMutation>("/api/products");
-  const onValid = async ({ category, name, price, description }: UploadProductForm) => {
+  const onValid = async ({
+    name,
+    price,
+    description,
+    photo,
+  }: UploadProductForm) => {
     if (loading) return;
+    if (!catId) {
+      selectRef.current?.focus();
+      return;
+    }
     if (photo && photo.length > 0) {
       const { uploadURL } = await (await fetch(`/api/files`)).json();
       const form = new FormData();
@@ -39,9 +51,26 @@ const Upload: NextPage = () => {
       const {
         result: { id },
       } = await (await fetch(uploadURL, { method: "POST", body: form })).json();
-      uploadProduct({ category, name, price, description, photoId: id });
+      uploadProduct({
+        name,
+        price,
+        description,
+        photoId: id,
+        addressId,
+        sido,
+        sigungu,
+        categoryId: catId,
+      });
     } else {
-      uploadProduct({ category, name, price, description });
+      uploadProduct({
+        name,
+        price,
+        description,
+        addressId,
+        sido,
+        sigungu,
+        categoryId: catId,
+      });
     }
   };
   useEffect(() => {
@@ -93,13 +122,15 @@ const Upload: NextPage = () => {
             </label>
           )}
         </div>
-        {/* 카테고리 입력 */}
-        <Category
-          register={register("category", { required: true })}
-          label="Category"
-          name="category"
-          required
-        />
+        <div>
+          <Dropdown
+            type="category"
+            isProduct={true}
+            spaceholder="카테고리"
+            selectRef={selectRef}
+            handleChangeSelect={(e) => setCatId(e.target.value)}
+          />
+        </div>
         <Input
           register={register("name", { required: true })}
           required
@@ -122,6 +153,7 @@ const Upload: NextPage = () => {
           label="Description"
           required
         />
+
         <Button text={loading ? "Loading..." : "Upload item"} />
       </form>
     </Layout>

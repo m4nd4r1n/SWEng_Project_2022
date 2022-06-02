@@ -37,7 +37,7 @@ const EditProfile: NextPage = () => {
     if (user?.phone) setValue("phone", user.phone);
     if (user?.avatar)
       setAvatarPreview(
-        `https://imagedelivery.net/aSbksvJjax-AUC7qVnaC4A/${user?.avatar}/avatar`
+        `https://imagedelivery.net/mBDIPXvPr-qhWpouLgwjOQ/${user?.avatar}/avatar`
       );
   }, [user, setValue]);
   const [editProfile, { data, loading }] =
@@ -65,7 +65,7 @@ const EditProfile: NextPage = () => {
         email,
         phone,
         name,
-        avatarUrl: id,
+        avatarId: id,
       });
     } else {
       editProfile({
@@ -97,8 +97,8 @@ const EditProfile: NextPage = () => {
               src={avatarPreview}
               className="h-14 w-14 rounded-full bg-slate-500"
               alt=""
-              height={48}
-              width={48}
+              height={56}
+              width={56}
             />
           ) : (
             <div className="h-14 w-14 rounded-full bg-slate-500" />
