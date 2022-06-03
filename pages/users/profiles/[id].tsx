@@ -13,6 +13,7 @@ import { Doughnut } from "react-chartjs-2";
 import { useRouter } from "next/router";
 import useUser from "@libs/client/useUser";
 import { CATEGORY, COLORS } from "@libs/string";
+import Button from "@components/button";
 
 interface ReviewWithUser extends Review {
   createdBy: User;
@@ -85,6 +86,9 @@ const Profile: NextPage<{ profile: ProfileWithProductAndReview }> = ({
     addList: [],
     address: [],
   });
+  const onReportClick = () => {
+    router.push(`/report/${profile?.id}`);
+  }
 
   useEffect(() => {
     if (profile) {
@@ -187,8 +191,13 @@ const Profile: NextPage<{ profile: ProfileWithProductAndReview }> = ({
                 </div>
               </div>
             </div>
-          </div>
         </div>
+        </div>
+        <Button
+            onClick={onReportClick}
+            text="🚨"
+            disabled={me?.id === profile?.id}
+          />
         {profile?.products.length !== 0 && (
           <>
             <div className="flex flex-row border-b p-5">
