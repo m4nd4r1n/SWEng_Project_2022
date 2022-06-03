@@ -120,7 +120,7 @@ const Profile: NextPage<{ profile: ProfileWithProductAndReview }> = ({
   }, [profile]);
 
   return (
-    <Layout hasTabBar title="사용자 정보" seoTitle="Profile">
+    <Layout hasTabBar={false} canGoBack title="사용자 정보" seoTitle="Profile">
       <div className="min-w-[440px] px-4">
         <div className="flex w-full items-center space-x-3 border-b-2 py-4">
           <div>

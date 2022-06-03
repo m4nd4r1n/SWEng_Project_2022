@@ -1,4 +1,4 @@
-import { Login, User } from "@prisma/client";
+import { Login, User, Manager } from "@prisma/client";
 import { useRouter } from "next/router";
 import { useEffect } from "react";
 import useSWR from "swr";
@@ -7,7 +7,7 @@ type Merge<A, B> = {
   [K in keyof A]: K extends keyof B ? B[K] : A[K];
 } & B;
 
-interface Profile extends Merge<User, { login: Login }> {}
+interface Profile extends Merge<User, { login: Login; manager: Manager }> {}
 interface ProfileResponse {
   ok: boolean;
   profile: Profile;
