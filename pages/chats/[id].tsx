@@ -10,6 +10,7 @@ import useSWR from "swr";
 import ModalBase from "@components/modal";
 import { CardModal } from "@components/cardModal";
 import useMutation from "@libs/client/useMutation";
+import Image from "next/image";
 
 interface User {
   name: string;
@@ -24,6 +25,7 @@ interface Product {
   description: string;
   userId: number;
   onSale: boolean;
+  image?: string;
 }
 
 interface RoomWithProduct {
@@ -129,6 +131,7 @@ const ChatDetail: NextPage = () => {
         onClick={sellProduct}
         isSale={data?.room?.product.onSale}
         avatarUrl={isMine ? user.avatar! : data?.user?.avatar}
+        product={data?.room?.product}
       />
     );
   });
@@ -228,17 +231,27 @@ const ChatDetail: NextPage = () => {
                 : sendPurchaseMessage
             }
           >
-            {data?.room?.product.description}
+            <div className="flex">
+              <div>
+                <Image
+                  src={`https://imagedelivery.net/mBDIPXvPr-qhWpouLgwjOQ/${data?.room?.product?.image}/avatar`}
+                  className="rounded-lg"
+                  height={64}
+                  width={64}
+                  alt=""
+                />
+              </div>
+              <span className="mb-2 ml-2 flex items-center text-center text-lg font-bold">
+                {data?.room?.product.price}원
+              </span>
+            </div>
+            <span className="break-all">{data?.room?.product.description}</span>
             <br />
-            {data?.room?.product.price}원
             {wallet?.currency! < data?.room?.product.price! && (
-              <>
-                <br />
-                <br />
-                <span className="text-red-600">
-                  현재 잔액: {wallet?.currency!}원
-                </span>
-              </>
+              <span className="text-red-600">
+                현재 잔액: {wallet?.currency!}원,{" "}
+                {data?.room?.product.price! - wallet?.currency!}원 부족
+              </span>
             )}
           </CardModal>
         </ModalBase>

@@ -41,6 +41,7 @@ async function handler(
               description: true,
               userId: true,
               onSale: true,
+              image: true,
             },
           },
         },
