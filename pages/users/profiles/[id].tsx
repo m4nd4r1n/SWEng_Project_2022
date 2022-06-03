@@ -1,7 +1,7 @@
 import type { NextPage, NextPageContext } from "next";
 import Layout from "@components/layout";
 import useSWR, { SWRConfig } from "swr";
-import { Review, User, Product, Address } from "@prisma/client";
+import { Review, User, Product, Address, Report } from "@prisma/client";
 import { cls } from "@libs/client/utils";
 import Image from "next/image";
 import { withSsrSession } from "@libs/server/withSession";
@@ -11,6 +11,8 @@ import { useState, useEffect } from "react";
 import "chart.js/auto";
 import { Doughnut } from "react-chartjs-2";
 import { useRouter } from "next/router";
+import useUser from "@libs/client/useUser";
+import { CATEGORY, COLORS } from "@libs/string";
 
 interface ReviewWithUser extends Review {
   createdBy: User;
@@ -19,6 +21,11 @@ interface ReviewWithUser extends Review {
 interface ReviewsResponse {
   ok: boolean;
   reviews: ReviewWithUser[];
+}
+
+interface ReportsResponse {
+  ok: boolean;
+  reports: Report[];
 }
 
 interface ProductWithAddressAndReviews extends Product {
@@ -54,44 +61,30 @@ const addCount = (
       products.filter((product) => product.addressId === address).length
   );
 
-const CATEGORY = [
-  "생활/건강",
-  "식품",
-  "디지털/가전",
-  "출산/육아",
-  "스포츠/레저",
-  "패션잡화",
-  "패션의류",
-  "가구/인테리어",
-  "도서",
-  "화장품/미용",
-  "여가/생활편의",
-];
-
-const COLORS = [
-  "#FF6384",
-  "#FF8C00",
-  "#36A2EB",
-  "#9ACD32",
-  "#FFCE56",
-  "#40E0D0",
-  "#7B68EE",
-  "#C71585",
-  "#B8860B",
-  "#663399",
-  "#191970",
-];
-
 const Profile: NextPage<{ profile: ProfileWithProductAndReview }> = ({
   profile,
 }) => {
+  const { user: me } = useUser();
   const router = useRouter();
-  const { data } = useSWR<ReviewsResponse>(`/api/reviews/${router.query.id}`);
-  const [count, setCount] = useState<{
+  const { data: reviews } = useSWR<ReviewsResponse>(
+    `/api/reviews/${router.query.id}`
+  );
+  const { data: reports } = useSWR<ReportsResponse>(
+    me?.manager ? `/api/reports/${router.query.id}` : null
+  );
+  const [state, setState] = useState<{
+    printReview: boolean;
+    printReport: boolean;
     category: number[];
     addList: { id: number; sido: string; sigungu: string }[];
     address: number[];
-  }>({ category: [], addList: [], address: [] });
+  }>({
+    printReview: false,
+    printReport: false,
+    category: [],
+    addList: [],
+    address: [],
+  });
 
   useEffect(() => {
     if (profile) {
@@ -107,7 +100,7 @@ const Profile: NextPage<{ profile: ProfileWithProductAndReview }> = ({
           address.map((addr) => addr.id)
         )
       );
-      setCount((prev) => ({
+      setState((prev) => ({
         ...prev,
         category: catCount(profile?.products),
         addList: address,
@@ -168,10 +161,11 @@ const Profile: NextPage<{ profile: ProfileWithProductAndReview }> = ({
                   <span>평균 거래 만족도</span>
                   <span className="font-bold text-orange-600">
                     {" "}
-                    {(data?.reviews ?? profile?.receivedReviews)
-                      .map((review) => review?.score)
-                      .reduce((sum, currValue) => sum + currValue, 0) /
-                      ((data?.reviews ?? profile?.receivedReviews).length || 1)}
+                    {reviews?.reviews &&
+                      reviews?.reviews
+                        .map((review) => review?.score)
+                        .reduce((sum, currValue) => sum + currValue, 0) /
+                        (reviews?.reviews.length || 1)}
                   </span>
                 </div>
                 <div className="text-sm">
@@ -204,7 +198,7 @@ const Profile: NextPage<{ profile: ProfileWithProductAndReview }> = ({
                   data={{
                     datasets: [
                       {
-                        data: count?.category,
+                        data: state?.category,
                         borderRadius: 5,
                         backgroundColor: COLORS,
                         hoverBackgroundColor: COLORS,
@@ -225,8 +219,8 @@ const Profile: NextPage<{ profile: ProfileWithProductAndReview }> = ({
               </div>
               <div className="flex w-full flex-row items-center justify-between space-x-12 px-12 pt-8">
                 <div className="flex flex-col space-y-2">
-                  {count.category &&
-                    count.category
+                  {state.category &&
+                    state.category
                       .map((count, index) => ({
                         category: CATEGORY[index],
                         count,
@@ -241,8 +235,8 @@ const Profile: NextPage<{ profile: ProfileWithProductAndReview }> = ({
                       )}
                 </div>
                 <div className="flex flex-col justify-between space-y-2">
-                  {count.category &&
-                    count.category
+                  {state.category &&
+                    state.category
                       .map((count, index) => ({
                         category: CATEGORY[index],
                         count,
@@ -255,7 +249,7 @@ const Profile: NextPage<{ profile: ProfileWithProductAndReview }> = ({
                             <span className="text-right" key={index}>
                               {(
                                 (item.count * 100) /
-                                count.category.reduce(
+                                state.category.reduce(
                                   (prev, curr) => prev + curr
                                 )
                               ).toFixed(0)}
@@ -273,13 +267,13 @@ const Profile: NextPage<{ profile: ProfileWithProductAndReview }> = ({
                   data={{
                     datasets: [
                       {
-                        data: count.address,
+                        data: state.address,
                         borderRadius: 5,
                         backgroundColor: COLORS,
                         hoverBackgroundColor: COLORS,
                       },
                     ],
-                    labels: count.addList.map(
+                    labels: state.addList.map(
                       (address) => address.sido + " " + address.sigungu
                     ),
                   }}
@@ -296,17 +290,17 @@ const Profile: NextPage<{ profile: ProfileWithProductAndReview }> = ({
               </div>
               <div className="flex w-full flex-row items-center justify-between space-x-12 px-12 pt-8">
                 <div className="flex flex-col space-y-2">
-                  {count.address &&
-                    count.address
-                      .map((cnt, index) => ({
-                        address: count.addList[index],
-                        cnt,
+                  {state.address &&
+                    state.address
+                      .map((count, index) => ({
+                        address: state.addList[index],
+                        count,
                       }))
-                      .sort((a, b) => b.cnt - a.cnt)
+                      .sort((a, b) => b.count - a.count)
                       .map(
                         (item, index) =>
                           index < 4 &&
-                          item.cnt > 0 && (
+                          item.count > 0 && (
                             <span key={index}>
                               {item.address.sido + " " + item.address.sigungu}
                             </span>
@@ -314,21 +308,21 @@ const Profile: NextPage<{ profile: ProfileWithProductAndReview }> = ({
                       )}
                 </div>
                 <div className="flex flex-col justify-between space-y-2">
-                  {count.address &&
-                    count.address
-                      .map((cnt, index) => ({
-                        address: count.addList[index],
-                        cnt,
+                  {state.address &&
+                    state.address
+                      .map((count, index) => ({
+                        address: state.addList[index],
+                        count,
                       }))
-                      .sort((a, b) => b.cnt - a.cnt)
+                      .sort((a, b) => b.count - a.count)
                       .map(
                         (item, index) =>
                           index < 4 &&
-                          item.cnt > 0 && (
+                          item.count > 0 && (
                             <span className="text-right" key={index}>
                               {(
-                                (item.cnt * 100) /
-                                count.address.reduce(
+                                (item.count * 100) /
+                                state.address.reduce(
                                   (prev, curr) => prev + curr
                                 )
                               ).toFixed(0)}
@@ -341,66 +335,200 @@ const Profile: NextPage<{ profile: ProfileWithProductAndReview }> = ({
             </div>
           </>
         )}
-        {(data?.reviews ?? profile?.receivedReviews).map((review) => (
-          <div
-            key={review.id}
-            className="flex items-start space-x-2 border-b py-4"
-          >
-            <div>
-              {review?.createdBy?.avatar ? (
-                <Image
-                  src={`https://imagedelivery.net/mBDIPXvPr-qhWpouLgwjOQ/${profile?.avatar}/avatar`}
-                  className="h-12 w-12 rounded-full bg-slate-500"
-                  alt=""
-                  height={12}
-                  width={12}
-                />
-              ) : (
-                <div className="flex h-12 w-12 items-center justify-center rounded-full bg-slate-500">
+        {reviews?.reviews && reviews?.reviews.length !== 0 && (
+          <div className="flex flex-col justify-end divide-y border-b-2">
+            <button
+              className="flex items-center justify-end space-x-2 p-4 text-sm text-gray-500 hover:text-black"
+              onClick={() =>
+                setState((prev) => ({
+                  ...prev,
+                  printReview: !state.printReview,
+                }))
+              }
+            >
+              {state.printReview ? (
+                <>
+                  <span>리뷰 닫기</span>
                   <svg
-                    className="h-6 w-6 items-center justify-center"
-                    fill="none"
+                    className="h-3 w-3 items-center justify-center"
+                    fill="currentColor"
                     stroke="currentColor"
-                    viewBox="0 0 24 24"
                     xmlns="http://www.w3.org/2000/svg"
+                    x="0px"
+                    y="0px"
+                    viewBox="0 0 330 330"
                   >
                     <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth="2"
-                      d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
-                    ></path>
+                      d="M324.001,209.25L173.997,96.75c-5.334-4-12.667-4-18,0L6.001,209.25c-6.627,4.971-7.971,14.373-3,21
+	c2.947,3.93,7.451,6.001,12.012,6.001c3.131,0,6.29-0.978,8.988-3.001L164.998,127.5l141.003,105.75c6.629,4.972,16.03,3.627,21-3
+	C331.972,223.623,330.628,214.221,324.001,209.25z"
+                    />
                   </svg>
-                </div>
-              )}
-            </div>
-            <div className="flex flex-col">
-              <span className="text-sm font-bold text-gray-800">
-                {review.createdBy.name}
-              </span>
-              <div className="flex items-center">
-                {[1, 2, 3, 4, 5].map((star) => (
+                </>
+              ) : (
+                <>
+                  <span>리뷰 보기</span>
                   <svg
-                    key={star}
-                    className={cls(
-                      "h-5 w-5",
-                      review.score >= star ? "text-orange-400" : "text-gray-400"
-                    )}
-                    xmlns="http://www.w3.org/2000/svg"
-                    viewBox="0 0 20 20"
+                    className="h-3 w-3 items-center justify-center"
                     fill="currentColor"
-                    aria-hidden="true"
+                    stroke="currentColor"
+                    xmlns="http://www.w3.org/2000/svg"
+                    x="0px"
+                    y="0px"
+                    viewBox="0 0 330 330"
                   >
-                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                    <path
+                      d="M325.607,79.393c-5.857-5.857-15.355-5.858-21.213,0.001l-139.39,139.393L25.607,79.393
+	c-5.857-5.857-15.355-5.858-21.213,0.001c-5.858,5.858-5.858,15.355,0,21.213l150.004,150c2.813,2.813,6.628,4.393,10.606,4.393
+	s7.794-1.581,10.606-4.394l149.996-150C331.465,94.749,331.465,85.251,325.607,79.393z"
+                    />
                   </svg>
-                ))}
-              </div>
-              <div className="mt-4 text-sm text-gray-600">
-                <p>{review.review}</p>
-              </div>
-            </div>
+                </>
+              )}
+            </button>
+            {state.printReview &&
+              reviews?.reviews &&
+              reviews?.reviews.map((review) => (
+                <div
+                  key={review.id}
+                  className="flex items-start space-x-2 py-4"
+                >
+                  <div className="flex h-12 w-12 items-center justify-center rounded-full bg-slate-500">
+                    {review?.createdBy?.avatar ? (
+                      <Image
+                        src={`https://imagedelivery.net/mBDIPXvPr-qhWpouLgwjOQ/${review.createdBy?.avatar}/avatar`}
+                        className="h-12 w-12 rounded-full bg-slate-500"
+                        alt=""
+                        height={48}
+                        width={48}
+                      />
+                    ) : (
+                      <svg
+                        className="h-6 w-6 items-center justify-center"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                        xmlns="http://www.w3.org/2000/svg"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth="2"
+                          d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+                        ></path>
+                      </svg>
+                    )}
+                  </div>
+                  <div className="flex flex-col">
+                    <span className="text-sm font-bold text-gray-800">
+                      {review.createdBy.name}
+                    </span>
+                    <div className="flex items-center">
+                      {[1, 2, 3, 4, 5].map((star) => (
+                        <svg
+                          key={star}
+                          className={cls(
+                            "h-5 w-5",
+                            review.score >= star
+                              ? "text-orange-400"
+                              : "text-gray-400"
+                          )}
+                          xmlns="http://www.w3.org/2000/svg"
+                          viewBox="0 0 20 20"
+                          fill="currentColor"
+                          aria-hidden="true"
+                        >
+                          <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                        </svg>
+                      ))}
+                    </div>
+                    <div className="mt-4 text-sm text-gray-600">
+                      <p>{review.review}</p>
+                    </div>
+                  </div>
+                </div>
+              ))}
           </div>
-        ))}
+        )}
+        {me?.manager && reports?.reports.length !== 0 && (
+          <div className="flex flex-col justify-end divide-y border-b-2">
+            <button
+              className="flex items-center justify-end space-x-2 p-4 text-sm text-gray-500 hover:text-black"
+              onClick={() =>
+                setState((prev) => ({
+                  ...prev,
+                  printReport: !state.printReport,
+                }))
+              }
+            >
+              {state.printReport ? (
+                <>
+                  <span>신고기록 닫기</span>
+                  <svg
+                    className="h-3 w-3 items-center justify-center"
+                    fill="currentColor"
+                    stroke="currentColor"
+                    xmlns="http://www.w3.org/2000/svg"
+                    x="0px"
+                    y="0px"
+                    viewBox="0 0 330 330"
+                  >
+                    <path
+                      d="M324.001,209.25L173.997,96.75c-5.334-4-12.667-4-18,0L6.001,209.25c-6.627,4.971-7.971,14.373-3,21
+	c2.947,3.93,7.451,6.001,12.012,6.001c3.131,0,6.29-0.978,8.988-3.001L164.998,127.5l141.003,105.75c6.629,4.972,16.03,3.627,21-3
+	C331.972,223.623,330.628,214.221,324.001,209.25z"
+                    />
+                  </svg>
+                </>
+              ) : (
+                <>
+                  <span>신고기록 보기</span>
+                  <svg
+                    className="h-3 w-3 items-center justify-center"
+                    fill="currentColor"
+                    stroke="currentColor"
+                    xmlns="http://www.w3.org/2000/svg"
+                    x="0px"
+                    y="0px"
+                    viewBox="0 0 330 330"
+                  >
+                    <path
+                      d="M325.607,79.393c-5.857-5.857-15.355-5.858-21.213,0.001l-139.39,139.393L25.607,79.393
+	c-5.857-5.857-15.355-5.858-21.213,0.001c-5.858,5.858-5.858,15.355,0,21.213l150.004,150c2.813,2.813,6.628,4.393,10.606,4.393
+	s7.794-1.581,10.606-4.394l149.996-150C331.465,94.749,331.465,85.251,325.607,79.393z"
+                    />
+                  </svg>
+                </>
+              )}
+            </button>
+            {state.printReport &&
+              reports?.reports &&
+              reports?.reports.length !== 0 &&
+              reports?.reports.map((report) => (
+                <div
+                  key={report.id}
+                  className="flex flex-col items-start space-y-2 border-b p-4 text-gray-600"
+                >
+                  <h2 className="flex w-full font-bold">[ {report?.title} ]</h2>
+                  {report?.description && (
+                    <a className="flex w-full text-sm">
+                      {report?.description &&
+                        "매우긴텍스트매우긴텍스트매우긴텍스트매우긴텍스트매우긴텍스트매우긴텍스트매우긴텍스트매우긴텍스트매우긴텍스트매우긴텍스트매우긴텍스트매우긴텍스트매우긴텍스트매우긴텍스트매우긴텍스트매우긴텍스트매우긴텍스트매우긴텍스트매우긴텍스트매우긴텍스트매우긴텍스트매우긴텍스트매우긴텍스트매우긴텍스트매우긴텍스트매우긴텍스트매우긴텍스트매우긴텍스트매우긴텍스트매우긴텍스트매우긴텍스트"}
+                    </a>
+                  )}
+                  {report?.createdAt && (
+                    <span className="flex w-full justify-end text-xs">
+                      {new Date(report?.createdAt).toLocaleDateString("ko-KR", {
+                        day: "numeric",
+                        month: "short",
+                        year: "numeric",
+                      })}
+                    </span>
+                  )}
+                </div>
+              ))}
+          </div>
+        )}
       </div>
     </Layout>
   );
@@ -435,15 +563,6 @@ export const getServerSideProps: GetServerSideProps = withSsrSession(
           },
           orderBy: {
             categoryId: "asc",
-          },
-        },
-        receivedReviews: {
-          include: {
-            createdBy: {
-              select: {
-                name: true,
-              },
-            },
           },
         },
       },
