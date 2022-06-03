@@ -81,7 +81,7 @@ const Streams: NextPage = () => {
   return (
     <Layout canGoBack seoTitle="Stream Detail">
       <div className="space-y-4 px-4  pb-10">
-        {data?.stream.live ? (
+        {data?.stream?.live ? (
           <h1 className="text-3xl font-bold text-gray-900">Live</h1>
         ) : (
           <h1 className="text-3xl font-bold text-gray-900">최근 진행된 Live</h1>
@@ -90,13 +90,13 @@ const Streams: NextPage = () => {
           <iframe
             className="aspect-video w-full rounded-md shadow-sm"
             src={
-              data.stream.live
+              data?.stream?.live
                 ? `https://iframe.videodelivery.net/${
-                    data?.stream.cloudflareId
+                    data?.stream?.cloudflareId
                   }?poster=${encodeURIComponent(
                     `https://videodelivery.net/${data?.stream.cloudflareId}/thumbnails/thumbnail.jpg?height=320`
                   )}`
-                : data.stream.preview
+                : data?.stream?.preview
             }
             allow="gyroscope; autoplay; encrypted-media; picture-in-picture;"
             allowFullScreen={true}
@@ -110,7 +110,7 @@ const Streams: NextPage = () => {
             ${data?.stream?.price}
           </span>
           <p className="my-6 text-gray-700">{data?.stream?.description}</p>
-          {data?.stream.userId === user?.id && (
+          {data?.stream?.userId === user?.id && (
             <button
               className="rounded-lg bg-orange-400 p-2 text-white transition hover:bg-orange-500"
               onClick={handleModal}
@@ -145,7 +145,7 @@ const Streams: NextPage = () => {
               />
             ))}
           </div>
-          {data?.stream.live && (
+          {data?.stream?.live && (
             <div className="fixed inset-x-0 bottom-0  bg-white py-2">
               <form
                 onSubmit={handleSubmit(onValid)}
