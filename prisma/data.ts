@@ -51,6 +51,48 @@ export const address = {
   sigungu: "성남시 분당구",
 };
 
+export const users = [
+  { phone: "010-1111-2222", name: "김당근" },
+  { phone: "010-2222-3333", name: "박서울" },
+  { phone: "010-3333-4444", name: "서부산" },
+  { phone: "010-4444-5555", name: "최하늘" },
+  { phone: "010-5555-6666", name: "김치" },
+  { phone: "010-6666-7777", name: "이파리" },
+];
+
+export const login = [
+  {
+    email: "test1@naver.com",
+    password: "password",
+    userId: 3,
+  },
+  {
+    email: "test2@naver.com",
+    password: "password",
+    userId: 4,
+  },
+  {
+    email: "test3@naver.com",
+    password: "password",
+    userId: 5,
+  },
+  {
+    email: "test4@naver.com",
+    password: "password",
+    userId: 6,
+  },
+  {
+    email: "test5@naver.com",
+    password: "password",
+    userId: 7,
+  },
+  {
+    email: "test6@naver.com",
+    password: "password",
+    userId: 8,
+  },
+];
+
 export const products = [
   {
     userId: 1,
@@ -150,5 +192,51 @@ export const products = [
     description: "생활편의상품",
     categoryId: 90000,
     addressId: 41135,
+  },
+];
+
+export const reviews = [
+  {
+    review: "친절하고 좋습니다.",
+    createdById: 1,
+    createdForId: 2,
+    score: 5,
+  },
+  {
+    review: "약속장소에서 기다린지 30분 뒤에 오네요",
+    createdById: 3,
+    createdForId: 2,
+    score: 1,
+  },
+  {
+    review: "중고품 치고 상태가 매우 좋아요",
+    createdById: 4,
+    createdForId: 2,
+    score: 5,
+  },
+  {
+    review: "좋아요.",
+    createdById: 5,
+    createdForId: 2,
+    score: 4,
+  },
+  {
+    review: "고작 천원 할인해달라했는데 무시하네요",
+    createdById: 6,
+    createdForId: 2,
+    score: 2,
+  },
+];
+
+export const reports = [
+  {
+    userId: 2,
+    productId: 13,
+    title: "카테고리 오류",
+    description: "상품 카테고리 잘못 올라와있어요",
+  },
+  {
+    userId: 2,
+    title: "욕설 신고",
   },
 ];
