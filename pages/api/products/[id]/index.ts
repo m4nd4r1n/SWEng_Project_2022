@@ -51,6 +51,32 @@ async function handler(
       },
     })
   );
+
+  if (user?.id && product?.categoryId) {
+    if (
+      await client.view.findFirst({
+        where: { userId: user.id, categoryId: product.categoryId },
+      })
+    ) {
+      // 해당 카테고리 조회정보가 존재하면 +! 증가
+      await client.view.updateMany({
+        where: { userId: user.id, categoryId: product.categoryId },
+        data: {
+          viewCount: {
+            increment: 1,
+          },
+        },
+      });
+    } else {
+      // 해당 카테고리 조회정보가 없으면 생성
+      await client.view.create({
+        data: {
+          userId: user.id,
+          categoryId: product.categoryId,
+        },
+      });
+    }
+  }
   res.json({ ok: true, product, isLiked, relatedProducts });
 }
 
