@@ -29,7 +29,7 @@ const Wallet: NextPage = () => {
   };
   useEffect(() => {
     if (data?.ok) {
-      router.push("/profile/wallet");
+      router.back();
     }
   }, [data, router]);
   return (

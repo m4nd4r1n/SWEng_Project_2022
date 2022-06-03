@@ -36,6 +36,12 @@ interface ParticipantResponse {
   room?: RoomWithProduct;
 }
 
+interface WalletResponse {
+  ok: boolean;
+  id: number;
+  currency: number;
+}
+
 const ChatDetail: NextPage = () => {
   const router = useRouter();
   const { user } = useUser();
@@ -48,6 +54,7 @@ const ChatDetail: NextPage = () => {
   const { data, mutate } = useSWR<ParticipantResponse>(
     `/api/chats/participant?roomId=${router.query.id}`
   );
+  const { data: wallet } = useSWR<WalletResponse>("/api/users/me/wallet");
   const [sell] = useMutation(
     `/api/products/${data?.room?.product.id}/transaction`
   );
@@ -65,7 +72,6 @@ const ChatDetail: NextPage = () => {
     channel.history({ limit: 25 }, (err: any, result: any) => {
       const reverse = result.items.reverse();
       setMessages([...reverse]);
-      console.log(reverse);
     });
   }, [channel]);
 
@@ -211,12 +217,29 @@ const ChatDetail: NextPage = () => {
           <CardModal
             closeEvent={onClickModalOff}
             title={data?.room?.product.name!}
-            actionMsg="구매 요청"
-            actionEvent={sendPurchaseMessage}
+            actionMsg={
+              wallet?.currency! < data?.room?.product.price!
+                ? "충전하기"
+                : "구매 요청"
+            }
+            actionEvent={
+              wallet?.currency! < data?.room?.product.price!
+                ? () => router.push("/profile/wallet/charge")
+                : sendPurchaseMessage
+            }
           >
             {data?.room?.product.description}
             <br />
             {data?.room?.product.price}원
+            {wallet?.currency! < data?.room?.product.price! && (
+              <>
+                <br />
+                <br />
+                <span className="text-red-600">
+                  현재 잔액: {wallet?.currency!}원
+                </span>
+              </>
+            )}
           </CardModal>
         </ModalBase>
       </div>
