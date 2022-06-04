@@ -113,15 +113,15 @@ const Reports: NextPage = () => {
                 <div className="flex w-full justify-end space-x-2 text-sm">
                   {report?.productId && (
                     <Link href={`/products/${report?.productId}`}>
-                      <span className="text-gray-500 underline hover:text-gray-800">
+                      <a className="text-gray-500 underline hover:text-gray-800">
                         상품정보
-                      </span>
+                      </a>
                     </Link>
                   )}
                   <Link href={`/users/profiles/${report?.userId}`}>
-                    <span className="text-gray-500 underline hover:text-gray-800">
+                    <a className="text-gray-500 underline hover:text-gray-800">
                       계정정보
-                    </span>
+                    </a>
                   </Link>
                 </div>
               </div>
