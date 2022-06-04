@@ -20,7 +20,7 @@ interface ProductsResponse {
 }
 
 const Home: NextPage = () => {
-  const { user, isLoading } = useUser();
+  const { user } = useUser();
   const { data } = useSWR<ProductsResponse>("/api/products");
 
   return (
@@ -193,30 +193,30 @@ const Home: NextPage = () => {
   );
 };
 
-const Page: NextPage<{ products: ProductWithCount[] }> = ({ products }) => {
-  return (
-    <SWRConfig
-      value={{
-        fallback: {
-          "/api/products": {
-            ok: true,
-            products,
-          },
-        },
-      }}
-    >
-      <Home />
-    </SWRConfig>
-  );
-};
+// const Page: NextPage<{ products: ProductWithCount[] }> = ({ products }) => {
+//   return (
+//     <SWRConfig
+//       value={{
+//         fallback: {
+//           "/api/products": {
+//             ok: true,
+//             products,
+//           },
+//         },
+//       }}
+//     >
+//       <Home />
+//     </SWRConfig>
+//   );
+// };
 
-export async function getServerSideProps() {
-  const products = await client.product.findMany({});
-  return {
-    props: {
-      products: JSON.parse(JSON.stringify(products)),
-    },
-  };
-}
+// export async function getServerSideProps() {
+//   const products = await client.product.findMany({});
+//   return {
+//     props: {
+//       products: JSON.parse(JSON.stringify(products)),
+//     },
+//   };
+// }
 
-export default Page;
+export default Home;
