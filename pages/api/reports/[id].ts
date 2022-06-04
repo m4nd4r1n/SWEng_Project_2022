@@ -12,20 +12,32 @@ async function handler(
     session: { user },
   } = req;
   if (user?.manager) {
-    const reports = await client.report.findMany({
-      where: {
-        userId: +id,
-      },
-    });
-    res.json({ ok: true, reports });
+    if (req.method === "GET") {
+      const reports = await client.report.findMany({
+        where: {
+          userId: +id,
+        },
+      });
+      res.json({ ok: true, reports });
+    }
+    if (req.method === "DELETE") {
+      await client.report.delete({
+        where: {
+          id: +id,
+        },
+      });
+      res.json({ ok: true });
+    }
   } else {
-    res.json({ ok: false });
+    return res
+      .status(403)
+      .json({ ok: false, error: "Only managers can access" });
   }
 }
 
 export default withApiSession(
   withHandler({
-    methods: ["GET"],
+    methods: ["GET", "DELETE"],
     handler,
   })
 );

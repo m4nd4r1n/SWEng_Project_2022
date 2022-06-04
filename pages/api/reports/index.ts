@@ -4,18 +4,16 @@ import client from "@libs/server/client";
 import { withApiSession } from "@libs/server/withSession";
 
 async function handler(
-req: NextApiRequest,
-res: NextApiResponse<ResponseType>
+  req: NextApiRequest,
+  res: NextApiResponse<ResponseType>
 ) {
-  
-  console.log("Got Request");
+  const {
+    session: { user },
+  } = req;
+
   if (req.method === "POST") {
     const {
-    body: {
-      title,
-      description,
-      userId,
-    },
+      body: { title, description, userId },
     } = req;
 
     const report = await client.report.create({
@@ -35,10 +33,38 @@ res: NextApiResponse<ResponseType>
     });
   }
   if (req.method === "GET") {
+    if (user?.manager) {
+      const reports = await client.report.findMany({
+        where: {
+          AND: [
+            {
+              user: {
+                disabled: false,
+              },
+            },
+          ],
+        },
+        include: {
+          user: {
+            select: {
+              id: true,
+              disabled: true,
+            },
+          },
+          product: {
+            select: {
+              id: true,
+            },
+          },
+        },
+      });
+      res.json({ ok: true, reports });
+    } else {
+      res.json({ ok: false });
+    }
   }
 }
-  
+
 export default withApiSession(
   withHandler({ methods: ["GET", "POST"], handler })
 );
-  
