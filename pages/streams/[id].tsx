@@ -1,4 +1,4 @@
-import type { NextPage } from "next";
+import type { GetServerSideProps, NextPage, NextPageContext } from "next";
 import Layout from "@components/layout";
 import Message from "@components/message";
 import useSWR from "swr";
@@ -10,6 +10,8 @@ import useUser from "@libs/client/useUser";
 import ModalBase from "@components/modal";
 import { CardModal } from "@components/cardModal";
 import { useState } from "react";
+import { withSsrSession } from "@libs/server/withSession";
+import client from "@libs/server/client";
 
 interface StreamMessage {
   message: string;
@@ -169,5 +171,32 @@ const Streams: NextPage = () => {
     </Layout>
   );
 };
+
+export const getServerSideProps: GetServerSideProps = withSsrSession(
+  async (context: NextPageContext) => {
+    const { id } = context.query;
+
+    if (!parseInt(id as string) && parseInt(id as string) !== 0) {
+      return {
+        notFound: true,
+      };
+    }
+
+    const streamInfo = await client.stream.findUnique({
+      where: {
+        id: +id!,
+      },
+    });
+
+    if (!streamInfo) {
+      return {
+        notFound: true,
+      };
+    }
+    return {
+      props: {},
+    };
+  }
+);
 
 export default Streams;

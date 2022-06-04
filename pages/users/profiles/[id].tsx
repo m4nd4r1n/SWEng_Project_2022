@@ -70,10 +70,10 @@ const Profile: NextPage = () => {
     `/api/profile/${router.query.id}`
   );
   const { data: reviews } = useSWR<ReviewsResponse>(
-    `/api/reviews/${router.query.id}`
+    router.query.id ? `/api/reviews/${router.query.id}` : null
   );
   const { data: reports } = useSWR<ReportsResponse>(
-    me?.manager ? `/api/reports/${router.query.id}` : null
+    me?.manager && router.query.id ? `/api/reports/${router.query.id}` : null
   );
   const [state, setState] = useState<{
     printReview: boolean;
@@ -660,9 +660,15 @@ export const getServerSideProps: GetServerSideProps = withSsrSession(
     // get request id
     const { id } = context.query;
 
+    if (!parseInt(id as string) && parseInt(id as string) !== 0) {
+      return {
+        notFound: true,
+      };
+    }
+
     // Read profile with user id value
     const profile = await client.user.findUnique({
-      where: { id: Number(id) },
+      where: { id: parseInt(id as string) },
       include: {
         login: {
           select: {
@@ -688,6 +694,12 @@ export const getServerSideProps: GetServerSideProps = withSsrSession(
         },
       },
     });
+
+    if (!profile) {
+      return {
+        notFound: true,
+      };
+    }
     return {
       props: {
         profile: JSON.parse(JSON.stringify(profile)),

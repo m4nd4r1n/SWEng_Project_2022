@@ -16,7 +16,7 @@ export default function Item({ title, price, hearts, id, image }: ItemProps) {
         <div className="flex space-x-4">
           {image ? (
             <Image
-              className="h-20 w-20 rounded-md"
+              className="-z-10 h-20 w-20 rounded-md"
               height={80}
               width={80}
               src={`https://imagedelivery.net/mBDIPXvPr-qhWpouLgwjOQ/${image}/public`}
