@@ -11,7 +11,7 @@ async function handler(
     query: { id },
     session: { user },
   } = req;
-  const stream = await client.stream.findUnique({
+  const streamInfo = await client.stream.findUnique({
     where: {
       id: +id.toString(),
     },
@@ -30,12 +30,41 @@ async function handler(
       },
     },
   });
+  const { videoUID, live } = await (
+    await fetch(
+      `https://videodelivery.net/${streamInfo?.cloudflareId}/lifecycle`
+    )
+  ).json();
+
+  if (!live) {
+    const { result } = await (
+      await fetch(
+        `https://api.cloudflare.com/client/v4/accounts/${process.env.CF_ID}/stream/live_inputs/${streamInfo?.cloudflareId}/videos`,
+        {
+          headers: {
+            Authorization: `Bearer ${process.env.CF_STREAM_TOKEN}`,
+          },
+        }
+      )
+    ).json();
+    if (result.length !== 0) {
+      const { thumbnail, preview } = result[0];
+      const stream = { ...streamInfo, videoUID, live, thumbnail, preview };
+      const isOwner = stream?.userId === user?.id;
+      if (stream && !isOwner) {
+        stream.cloudflareKey = "";
+        stream.cloudflareUrl = "";
+      }
+      return res.json({ ok: true, stream });
+    }
+  }
+  const stream = { ...streamInfo, videoUID, live };
   const isOwner = stream?.userId === user?.id;
   if (stream && !isOwner) {
-    stream.cloudflareKey = "xxxxx";
-    stream.cloudflareUrl = "xxxxx";
+    stream.cloudflareKey = "";
+    stream.cloudflareUrl = "";
   }
-  res.json({ ok: true, stream });
+  return res.json({ ok: true, stream });
 }
 
 export default withApiSession(

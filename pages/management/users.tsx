@@ -59,7 +59,7 @@ const Users: NextPage = () => {
                       <div className="flex h-16 w-16 items-center justify-center">
                         <Image
                           src={`https://imagedelivery.net/mBDIPXvPr-qhWpouLgwjOQ/${user?.avatar}/avatar`}
-                          className="rounded-full bg-slate-500"
+                          className="-z-20 rounded-full bg-slate-500"
                           alt=""
                           height={64}
                           width={64}

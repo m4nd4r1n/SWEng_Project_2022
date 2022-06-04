@@ -111,7 +111,7 @@ async function handler(
         })
       );
       ably.close();
-      roomList.forEach((data, i) => {
+      roomList.forEach((data: any, i) => {
         data.lastMessage = last[i];
       });
       res.json({ ok: true, roomList });

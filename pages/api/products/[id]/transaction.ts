@@ -74,6 +74,20 @@ async function handler(
     },
   });
 
+  await client.sale.create({
+    data: {
+      productId: +id,
+      userId: user?.id!,
+    },
+  });
+
+  await client.purchase.create({
+    data: {
+      productId: +id,
+      userId: opponentId,
+    },
+  });
+
   res.json({ ok: true });
 }
 
