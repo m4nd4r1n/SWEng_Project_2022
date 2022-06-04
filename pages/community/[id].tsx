@@ -1,14 +1,16 @@
-import type { NextPage } from "next";
+import type { GetServerSideProps, NextPage, NextPageContext } from "next";
 import Layout from "@components/layout";
 import TextArea from "@components/textarea";
 import { Answer, Post, User } from "@prisma/client";
 import { useRouter } from "next/router";
-import useSWR from "swr";
+import useSWR, { SWRConfig, unstable_serialize } from "swr";
 import Link from "next/link";
 import useMutation from "@libs/client/useMutation";
 import { cls } from "@libs/client/utils";
 import { useForm } from "react-hook-form";
 import { useEffect } from "react";
+import { withSsrSession } from "@libs/server/withSession";
+import client from "@libs/server/client";
 
 interface AnswerWithUser extends Answer {
   user: User;
@@ -183,5 +185,33 @@ const CommunityPostDetail: NextPage = () => {
     </Layout>
   );
 };
+
+export const getServerSideProps: GetServerSideProps = withSsrSession(
+  async (context: NextPageContext) => {
+    const { id } = context.query;
+
+    if (!parseInt(id as string) && parseInt(id as string) !== 0) {
+      return {
+        notFound: true,
+      };
+    }
+
+    const post = await client.post.findUnique({
+      where: {
+        id: +id!,
+      },
+    });
+
+    if (!post) {
+      return {
+        notFound: true,
+      };
+    }
+
+    return {
+      props: {},
+    };
+  }
+);
 
 export default CommunityPostDetail;

@@ -1,6 +1,6 @@
 import type { NextPage, NextPageContext } from "next";
 import Layout from "@components/layout";
-import useSWR, { SWRConfig } from "swr";
+import useSWR from "swr";
 import { Review, User, Product, Address, Report } from "@prisma/client";
 import { cls } from "@libs/client/utils";
 import Image from "next/image";
@@ -13,7 +13,6 @@ import { Doughnut } from "react-chartjs-2";
 import { useRouter } from "next/router";
 import useUser from "@libs/client/useUser";
 import { CATEGORY, COLORS } from "@libs/string";
-import Button from "@components/button";
 import FloatingButton from "@components/floating-button";
 
 interface ReviewWithUser extends Review {
@@ -69,10 +68,10 @@ const Profile: NextPage<{ profile: ProfileWithProductAndReview }> = ({
   const { user: me } = useUser();
   const router = useRouter();
   const { data: reviews } = useSWR<ReviewsResponse>(
-    `/api/reviews/${router.query.id}`
+    router.query.id ? `/api/reviews/${router.query.id}` : null
   );
   const { data: reports } = useSWR<ReportsResponse>(
-    me?.manager ? `/api/reports/${router.query.id}` : null
+    me?.manager && router.query.id ? `/api/reports/${router.query.id}` : null
   );
   const [state, setState] = useState<{
     printReview: boolean;
@@ -562,9 +561,15 @@ export const getServerSideProps: GetServerSideProps = withSsrSession(
     // get request id
     const { id } = context.query;
 
+    if (!parseInt(id as string) && parseInt(id as string) !== 0) {
+      return {
+        notFound: true,
+      };
+    }
+
     // Read profile with user id value
     const profile = await client.user.findUnique({
-      where: { id: Number(id) },
+      where: { id: parseInt(id as string) },
       include: {
         login: {
           select: {
@@ -590,6 +595,12 @@ export const getServerSideProps: GetServerSideProps = withSsrSession(
         },
       },
     });
+
+    if (!profile) {
+      return {
+        notFound: true,
+      };
+    }
     return {
       props: {
         profile: JSON.parse(JSON.stringify(profile)),

@@ -1,8 +1,8 @@
-import type { NextPage } from "next";
+import type { GetServerSideProps, NextPage, NextPageContext } from "next";
 import Button from "@components/button";
 import Layout from "@components/layout";
 import { useRouter } from "next/router";
-import useSWR from "swr";
+import useSWR, { SWRConfig, unstable_serialize } from "swr";
 import Link from "next/link";
 import { Product, User } from "@prisma/client";
 import useMutation from "@libs/client/useMutation";
@@ -10,6 +10,8 @@ import { cls } from "@libs/client/utils";
 import useUser from "@libs/client/useUser";
 import Image from "next/image";
 import { useEffect } from "react";
+import { withSsrSession } from "@libs/server/withSession";
+import client from "@libs/server/client";
 
 interface ProductWithUser extends Product {
   user: User;
@@ -22,7 +24,7 @@ interface ItemDetailResponse {
 }
 
 const ItemDetail: NextPage = () => {
-  const { user, isLoading } = useUser();
+  const { user } = useUser();
   const router = useRouter();
   const { data, mutate: boundMutate } = useSWR<ItemDetailResponse>(
     router.query.id ? `/api/products/${router.query.id}` : null
@@ -48,24 +50,32 @@ const ItemDetail: NextPage = () => {
   }, [roomId, router]);
   return (
     <Layout canGoBack seoTitle="Product Detail">
-      <div className="px-4  py-4">
+      <div className="px-4 py-4">
         <div className="mb-8">
           <div className="relative pb-80">
-            <Image
-              src={`https://imagedelivery.net/mBDIPXvPr-qhWpouLgwjOQ/${data?.product.image}/public`}
-              className="bg-slate-100 object-contain"
-              layout="fill"
-              alt=""
-            />
+            {data?.product.image ? (
+              <Image
+                src={`https://imagedelivery.net/mBDIPXvPr-qhWpouLgwjOQ/${data?.product.image}/public`}
+                className="bg-slate-100 object-contain"
+                layout="fill"
+                alt=""
+              />
+            ) : (
+              <div className="absolute h-80 w-full bg-slate-100" />
+            )}
           </div>
           <div className="flex cursor-pointer items-center space-x-3 border-t border-b py-3">
-            <Image
-              src={`https://imagedelivery.net/mBDIPXvPr-qhWpouLgwjOQ/${data?.product?.user?.avatar}/avatar`}
-              className="h-12 w-12 rounded-full bg-slate-300"
-              alt=""
-              height={48}
-              width={48}
-            />
+            {data?.product?.user?.avatar ? (
+              <Image
+                src={`https://imagedelivery.net/mBDIPXvPr-qhWpouLgwjOQ/${data?.product?.user?.avatar}/avatar`}
+                className="h-12 w-12 rounded-full bg-slate-300"
+                alt=""
+                height={48}
+                width={48}
+              />
+            ) : (
+              <div className="h-12 w-12 rounded-full bg-slate-300" />
+            )}
             <div className="">
               {data ? (
                 <p className="text-sm font-medium text-gray-700">
@@ -88,7 +98,7 @@ const ItemDetail: NextPage = () => {
                   {data?.product?.name}
                 </h1>
                 <span className="mt-3 block text-2xl text-gray-900">
-                  ${data?.product?.price}
+                  ₩{data?.product?.price}
                 </span>
                 <p className="my-6 text-gray-700">
                   {data?.product?.description}
@@ -192,5 +202,32 @@ const ItemDetail: NextPage = () => {
     </Layout>
   );
 };
+
+export const getServerSideProps: GetServerSideProps = withSsrSession(
+  async (context: NextPageContext) => {
+    const { id } = context.query;
+
+    if (!parseInt(id as string) && parseInt(id as string) !== 0) {
+      return {
+        notFound: true,
+      };
+    }
+
+    const product = await client.product.findUnique({
+      where: {
+        id: +id!,
+      },
+    });
+    if (!product) {
+      return {
+        notFound: true,
+      };
+    }
+
+    return {
+      props: {},
+    };
+  }
+);
 
 export default ItemDetail;
