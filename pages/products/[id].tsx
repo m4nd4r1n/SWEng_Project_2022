@@ -10,6 +10,7 @@ import { cls } from "@libs/client/utils";
 import useUser from "@libs/client/useUser";
 import Image from "next/image";
 import { useEffect } from "react";
+import Map from "@components/Map";
 
 interface ProductWithUser extends Product {
   user: User;
@@ -46,6 +47,10 @@ const ItemDetail: NextPage = () => {
       router.push(`/chats/${roomId?.id}`);
     }
   }, [roomId, router]);
+
+  const test_la: number = 37.6197503;
+  const test_lo: number = 127.060937;
+
   return (
     <Layout canGoBack seoTitle="Product Detail">
       <div className="px-4  py-4">
@@ -101,11 +106,17 @@ const ItemDetail: NextPage = () => {
                 <div className="my-6 h-4 animate-pulse rounded-md bg-slate-300" />
               </>
             )}
-
+            {/* KAKAO Map */}
+            <div className="mt-full">
+              {(data?.product?.latitude) && (data?.product?.longitude) ? (
+                <Map latitude={data?.product?.latitude} longitude={data?.product?.longitude}/>
+              ) : (
+                <Map latitude={test_la} longitude={test_lo}/>
+              )}
+            </div>
             <div className="flex items-center justify-between space-x-2">
               <Button
                 onClick={onChatClick}
-                large
                 text="Talk to seller"
                 disabled={user?.id === data?.product.userId}
               />
@@ -118,6 +129,7 @@ const ItemDetail: NextPage = () => {
                     : "text-gray-400  hover:text-gray-500"
                 )}
               >
+                
                 {data?.isLiked ? (
                   <svg
                     className="h-6 w-6"
@@ -149,6 +161,7 @@ const ItemDetail: NextPage = () => {
                   </svg>
                 )}
               </button>
+              
             </div>
           </div>
         </div>
