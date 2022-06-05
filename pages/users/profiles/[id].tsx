@@ -1,4 +1,4 @@
-import type { NextPage, NextPageContext } from "next";
+import type { NextPage, NextPageContext, GetServerSideProps } from "next";
 import Layout from "@components/layout";
 import useSWR, { useSWRConfig, SWRConfig } from "swr";
 import { Review, User, Product, Address, Report } from "@prisma/client";
@@ -6,7 +6,6 @@ import { cls } from "@libs/client/utils";
 import Image from "next/image";
 import { withSsrSession } from "@libs/server/withSession";
 import client from "@libs/server/client";
-import { GetServerSideProps } from "next";
 import { useState, useEffect } from "react";
 import "chart.js/auto";
 import { Doughnut } from "react-chartjs-2";

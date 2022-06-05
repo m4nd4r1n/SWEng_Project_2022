@@ -1,21 +1,19 @@
-import { useState } from "react";
 import type { NextPage } from "next";
+import { useState } from "react";
 import FloatingButton from "@components/floating-button";
 import Item from "@components/item";
 import Layout from "@components/layout";
-import useUser from "@libs/client/useUser";
-import useSWR, { SWRConfig } from "swr";
-import { ProductWithCount } from "../index";
+import useSWR from "swr";
+import { ProductWithCountAndAddress } from "../index";
 import qs from "qs";
 import Dropdown from "@components/dropdown";
 
 interface ProductsResponse {
   ok: boolean;
-  products: ProductWithCount[];
+  products: ProductWithCountAndAddress[];
 }
 
 const Search: NextPage = () => {
-  const { user, isLoading } = useUser();
   const [sort, setSort] = useState("");
   const [catId, setCatId] = useState("");
   const [query, setQuery] = useState("");
@@ -34,11 +32,13 @@ const Search: NextPage = () => {
           <Dropdown
             type="category"
             spaceholder="카테고리"
+            value={catId}
             handleChangeSelect={(e) => setCatId(e.target.value)}
           />
           <Dropdown
             type="option"
             spaceholder="정렬 옵션"
+            value={sort}
             handleChangeSelect={(e) => setSort(e.target.value)}
           />
         </div>
@@ -76,13 +76,15 @@ const Search: NextPage = () => {
           </button>
         </div>
       </div>
-      <div className="mt-28 flex flex-col space-y-5 divide-y">
+      <div className="mt-30 flex flex-col space-y-5 divide-y">
         {data
           ? data?.products?.map((product) => (
               <Item
                 id={product.id}
                 key={product.id}
                 title={product.name}
+                categoryId={product.categoryId}
+                address={product.address.sido + " " + product.address.sigungu}
                 price={product.price}
                 hearts={product._count?.favs || 0}
                 image={product.image}
@@ -111,21 +113,4 @@ const Search: NextPage = () => {
   );
 };
 
-const Page: NextPage<{ products: ProductWithCount[] }> = ({ products }) => {
-  return (
-    <SWRConfig
-      value={{
-        fallback: {
-          "/api/products": {
-            ok: true,
-            products,
-          },
-        },
-      }}
-    >
-      <Search />
-    </SWRConfig>
-  );
-};
-
-export default Page;
+export default Search;

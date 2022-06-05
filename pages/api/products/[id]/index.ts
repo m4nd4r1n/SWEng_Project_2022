@@ -24,6 +24,12 @@ async function handler(
             avatar: true,
           },
         },
+        address: {
+          select: {
+            sido: true,
+            sigungu: true,
+          },
+        },
       },
     });
     const terms = product?.name.split(" ").map((word) => ({
@@ -81,6 +87,93 @@ async function handler(
       res.json({ ok: true, product, isLiked, relatedProducts });
     }
   }
+  if (req.method === "POST") {
+    const {
+      query: { id },
+      body: {
+        name,
+        price,
+        description,
+        photoId,
+        addressId,
+        sido,
+        sigungu,
+        categoryId,
+      },
+      session: { user },
+    } = req;
+    const currentProduct = await client.product.findUnique({
+      where: { id: +id.toString() },
+    });
+    if (currentProduct?.userId !== user?.id && !user?.manager) {
+      return res.status(403).json({ ok: false, error: "No permission" });
+    }
+
+    if (name) {
+      await client.product.update({
+        where: {
+          id: +id.toString(),
+        },
+        data: { name },
+      });
+    }
+    if (price) {
+      await client.product.update({
+        where: {
+          id: +id.toString(),
+        },
+        data: { price },
+      });
+    }
+    if (description) {
+      await client.product.update({
+        where: {
+          id: +id.toString(),
+        },
+        data: { description },
+      });
+    }
+    if (photoId) {
+      await client.product.update({
+        where: {
+          id: +id.toString(),
+        },
+        data: { image: photoId },
+      });
+    }
+    if (addressId) {
+      await client.product.update({
+        where: {
+          id: +id.toString(),
+        },
+        data: {
+          address: {
+            connectOrCreate: {
+              create: {
+                id: addressId,
+                sido,
+                sigungu,
+              },
+              where: {
+                id: addressId,
+              },
+            },
+          },
+        },
+      });
+    }
+    if (categoryId) {
+      await client.product.update({
+        where: {
+          id: +id.toString(),
+        },
+        data: { categoryId },
+      });
+    }
+    res.json({
+      ok: true,
+    });
+  }
   if (req?.method === "DELETE") {
     const product = await client.product.findUnique({
       where: {
@@ -97,11 +190,11 @@ async function handler(
       });
       res.json({ ok: true });
     } else {
-      return res.status(403).json({ ok: false });
+      return res.status(403).json({ ok: false, error: "No permission" });
     }
   }
 }
 
 export default withApiSession(
-  withHandler({ methods: ["GET", "DELETE"], handler })
+  withHandler({ methods: ["GET", "POST", "DELETE"], handler })
 );
