@@ -1,4 +1,4 @@
-import type { NextPage } from "next";
+import type { GetServerSideProps, NextPage, NextPageContext } from "next";
 import Layout from "@components/layout";
 import Message from "@components/message";
 import { useChannel } from "@libs/client/useChannel";
@@ -44,7 +44,7 @@ interface WalletResponse {
   currency: number;
 }
 
-const ChatDetail: NextPage = () => {
+const ChatDetail: NextPage<{ roomId: number }> = ({ roomId }) => {
   const router = useRouter();
   const { user } = useUser();
   const inputBox = useRef<HTMLInputElement>(null);
@@ -54,7 +54,7 @@ const ChatDetail: NextPage = () => {
     []
   );
   const { data, mutate } = useSWR<ParticipantResponse>(
-    `/api/chats/participant?roomId=${router.query.id}`
+    `/api/chats/participant?roomId=${roomId}`
   );
   const { data: wallet } = useSWR<WalletResponse>("/api/users/me/wallet");
   const [sell] = useMutation(
@@ -63,7 +63,7 @@ const ChatDetail: NextPage = () => {
   const messageTextIsEmpty = messageText.trim().length === 0;
 
   const [channel, ably]: any = useChannel(
-    `${router.query.id}`,
+    `${roomId}`,
     (message: Ably.Types.Message) => {
       const history = receivedMessages.slice(-199);
       setMessages([...history, message]);
@@ -258,6 +258,22 @@ const ChatDetail: NextPage = () => {
       </div>
     </Layout>
   );
+};
+
+export const getServerSideProps: GetServerSideProps = async (context) => {
+  const { id } = context.query;
+
+  if (!parseInt(id as string)) {
+    return {
+      notFound: true,
+    };
+  }
+
+  return {
+    props: {
+      roomId: id,
+    },
+  };
 };
 
 export default ChatDetail;

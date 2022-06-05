@@ -51,6 +51,37 @@ export const address = {
   sigungu: "성남시 분당구",
 };
 
+export const products = categories
+  .map((category) => {
+    let products: {
+      userId: number;
+      image: string;
+      name: string;
+      price: number;
+      description: string;
+      categoryId: number;
+      addressId: number;
+    }[] = [];
+
+    for (let i = 0; i < 10; i++) {
+      products = [
+        ...products,
+        {
+          userId: 1,
+          image: "",
+          name: `${category.name}상품${i}`,
+          price: +((Math.random() + 0.1) * 10).toFixed(0) * 10000,
+          description: `${i}번째 ${category.name} 상품`,
+          categoryId: category.id,
+          addressId: 41135,
+        },
+      ];
+    }
+
+    return products;
+  })
+  .reduce((prev, curr) => [...prev, ...curr]);
+
 export const users = [
   { phone: "010-1111-2222", name: "김당근" },
   { phone: "010-2222-3333", name: "박서울" },
@@ -90,108 +121,6 @@ export const login = [
     email: "test6@naver.com",
     password: "password",
     userId: 8,
-  },
-];
-
-export const products = [
-  {
-    userId: 1,
-    image: "",
-    name: "상품1",
-    price: 10000,
-    description: "생활상품",
-    categoryId: 10000,
-    addressId: 41135,
-  },
-  {
-    userId: 1,
-    image: "",
-    name: "상품2",
-    price: 10000,
-    description: "식품상품",
-    categoryId: 20000,
-    addressId: 41135,
-  },
-  {
-    userId: 1,
-    image: "",
-    name: "상품3",
-    price: 10000,
-    description: "디지털상품",
-    categoryId: 30000,
-    addressId: 41135,
-  },
-  {
-    userId: 1,
-    image: "",
-    name: "상품4",
-    price: 10000,
-    description: "육아상품",
-    categoryId: 40000,
-    addressId: 41135,
-  },
-  {
-    userId: 1,
-    image: "",
-    name: "상품5",
-    price: 10000,
-    description: "스포츠상품",
-    categoryId: 50000,
-    addressId: 41135,
-  },
-  {
-    userId: 1,
-    image: "",
-    name: "상품6",
-    price: 10000,
-    description: "패션잡화상품",
-    categoryId: 60001,
-    addressId: 41135,
-  },
-  {
-    userId: 1,
-    image: "",
-    name: "상품7",
-    price: 10000,
-    description: "패션의류상품",
-    categoryId: 60002,
-    addressId: 41135,
-  },
-  {
-    userId: 1,
-    image: "",
-    name: "상품8",
-    price: 10000,
-    description: "가구상품",
-    categoryId: 70000,
-    addressId: 41135,
-  },
-  {
-    userId: 1,
-    image: "",
-    name: "상품9",
-    price: 10000,
-    description: "도서상품",
-    categoryId: 80000,
-    addressId: 41135,
-  },
-  {
-    userId: 1,
-    image: "",
-    name: "상품10",
-    price: 10000,
-    description: "화장품상품",
-    categoryId: 60003,
-    addressId: 41135,
-  },
-  {
-    userId: 1,
-    image: "",
-    name: "상품11",
-    price: 10000,
-    description: "생활편의상품",
-    categoryId: 90000,
-    addressId: 41135,
   },
 ];
 

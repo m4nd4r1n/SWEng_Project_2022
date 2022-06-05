@@ -1,19 +1,17 @@
-import type { NextPage, NextPageContext } from "next";
+import type { NextPage, NextPageContext, GetServerSideProps } from "next";
 import Layout from "@components/layout";
-import useSWR, { SWRConfig } from "swr";
+import useSWR, { useSWRConfig, SWRConfig } from "swr";
 import { Review, User, Product, Address, Report } from "@prisma/client";
 import { cls } from "@libs/client/utils";
 import Image from "next/image";
 import { withSsrSession } from "@libs/server/withSession";
 import client from "@libs/server/client";
-import { GetServerSideProps } from "next";
 import { useState, useEffect } from "react";
 import "chart.js/auto";
 import { Doughnut } from "react-chartjs-2";
 import { useRouter } from "next/router";
 import useUser from "@libs/client/useUser";
 import { CATEGORY, COLORS } from "@libs/string";
-import Button from "@components/button";
 import FloatingButton from "@components/floating-button";
 
 interface ReviewWithUser extends Review {
@@ -30,17 +28,20 @@ interface ReportsResponse {
   reports: Report[];
 }
 
-interface ProductWithAddressAndReviews extends Product {
+interface ProductWithAddress extends Product {
   address: Address;
-  receivedReviews: ReviewWithUser[];
 }
 
-interface ProfileWithProductAndReview extends User {
-  products: Array<ProductWithAddressAndReviews>;
-  receivedReviews: Array<ReviewWithUser>;
+interface ProfileWithProduct extends User {
+  products: Array<ProductWithAddress>;
 }
 
-const catCount = (products: Array<ProductWithAddressAndReviews>) => [
+interface ProfileResponse {
+  ok: boolean;
+  profile: ProfileWithProduct;
+}
+
+const catCount = (products: Array<ProductWithAddress>) => [
   products.filter((product) => product.categoryId === 10000).length,
   products.filter((product) => product.categoryId === 20000).length,
   products.filter((product) => product.categoryId === 30000).length,
@@ -54,25 +55,24 @@ const catCount = (products: Array<ProductWithAddressAndReviews>) => [
   products.filter((product) => product.categoryId === 90000).length,
 ];
 
-const addCount = (
-  products: Array<ProductWithAddressAndReviews>,
-  addList: number[]
-) =>
+const addCount = (products: Array<ProductWithAddress>, addList: number[]) =>
   addList.map(
     (address) =>
       products.filter((product) => product.addressId === address).length
   );
 
-const Profile: NextPage<{ profile: ProfileWithProductAndReview }> = ({
-  profile,
-}) => {
+const Profile: NextPage = () => {
   const { user: me } = useUser();
+  const { mutate } = useSWRConfig();
   const router = useRouter();
+  const { data: profile } = useSWR<ProfileResponse>(
+    `/api/profile/${router.query.id}`
+  );
   const { data: reviews } = useSWR<ReviewsResponse>(
-    `/api/reviews/${router.query.id}`
+    router.query.id ? `/api/reviews/${router.query.id}` : null
   );
   const { data: reports } = useSWR<ReportsResponse>(
-    me?.manager ? `/api/reports/${router.query.id}` : null
+    me?.manager && router.query.id ? `/api/reports/${router.query.id}` : null
   );
   const [state, setState] = useState<{
     printReview: boolean;
@@ -88,29 +88,31 @@ const Profile: NextPage<{ profile: ProfileWithProductAndReview }> = ({
     address: [],
   });
   const onReportClick = () => {
-    router.push(`/report/${profile?.id}`);
+    router.push(`/report/${profile?.profile?.id}`);
   };
 
   useEffect(() => {
-    if (profile) {
+    if (profile?.profile) {
       const address = Array.from(
         new Set(
-          profile?.products.map((product) => JSON.stringify(product.address))
+          profile?.profile?.products.map((product) =>
+            JSON.stringify(product.address)
+          )
         )
       ).map((product) => JSON.parse(product));
       console.log(address);
       console.log(
         addCount(
-          profile?.products,
+          profile?.profile?.products,
           address.map((addr) => addr.id)
         )
       );
       setState((prev) => ({
         ...prev,
-        category: catCount(profile?.products),
+        category: catCount(profile?.profile?.products),
         addList: address,
         address: addCount(
-          profile?.products,
+          profile?.profile?.products,
           address.map((addr) => addr.id)
         ),
       }));
@@ -122,9 +124,9 @@ const Profile: NextPage<{ profile: ProfileWithProductAndReview }> = ({
       <div className="min-w-[440px] px-4">
         <div className="flex w-full items-center space-x-3 border-b-2 py-4">
           <div>
-            {profile?.avatar ? (
+            {profile?.profile?.avatar ? (
               <Image
-                src={`https://imagedelivery.net/mBDIPXvPr-qhWpouLgwjOQ/${profile?.avatar}/avatar`}
+                src={`https://imagedelivery.net/mBDIPXvPr-qhWpouLgwjOQ/${profile?.profile?.avatar}/avatar`}
                 className="h-16 w-16 rounded-full bg-slate-500"
                 alt=""
                 height={56}
@@ -150,16 +152,91 @@ const Profile: NextPage<{ profile: ProfileWithProductAndReview }> = ({
             )}
           </div>
           <div className="flex h-16 w-[465px] flex-col items-start justify-center px-4">
-            <span className="pb-2 font-bold text-gray-900">
-              {profile?.name}
-            </span>
+            <div className="flex w-full justify-between">
+              <span className="pb-2 font-bold text-gray-900">
+                {profile?.profile?.name}
+              </span>
+              <div className="flex items-center justify-center">
+                {me?.manager &&
+                  (profile?.profile.disabled ? (
+                    <button
+                      className="flex items-center justify-center text-gray-400 hover:text-black"
+                      onClick={() => {
+                        if (
+                          window.confirm(
+                            `${profile?.profile?.name}의 계정을 복원시키겠습니까?`
+                          )
+                        ) {
+                          fetch(
+                            `/api/users/management/enable/${profile?.profile?.id}`,
+                            {
+                              method: "POST",
+                            }
+                          ).then(() =>
+                            mutate(`/api/profile/${router.query.id}`)
+                          );
+                        }
+                      }}
+                    >
+                      <svg
+                        className="h-4 w-4"
+                        stroke="currentColor"
+                        fill="currentColor"
+                        viewBox="0 0 32 32"
+                        id="icon"
+                        xmlns="http://www.w3.org/2000/svg"
+                      >
+                        <path d="M18,28A12,12,0,1,0,6,16v6.2L2.4,18.6,1,20l6,6,6-6-1.4-1.4L8,22.2V16H8A10,10,0,1,1,18,26Z" />
+                      </svg>
+                    </button>
+                  ) : (
+                    <button
+                      className="text-gray-500 hover:text-red-700"
+                      onClick={() => {
+                        if (
+                          window.confirm(
+                            `${profile?.profile?.name}의 계정을 정지시키겠습니까?`
+                          )
+                        ) {
+                          fetch(
+                            `/api/users/management/disable/${profile?.profile?.id}`,
+                            {
+                              method: "POST",
+                            }
+                          ).then(() =>
+                            mutate(`/api/profile/${router.query.id}`)
+                          );
+                        }
+                      }}
+                    >
+                      <svg
+                        className="h-3 w-3"
+                        fill="currentColor"
+                        stroke="currentColor"
+                        xmlns="http://www.w3.org/2000/svg"
+                        viewBox="0 0 460.775 460.775"
+                      >
+                        <path
+                          d="M285.08,230.397L456.218,59.27c6.076-6.077,6.076-15.911,0-21.986L423.511,4.565c-2.913-2.911-6.866-4.55-10.992-4.55
+	c-4.127,0-8.08,1.639-10.993,4.55l-171.138,171.14L59.25,4.565c-2.913-2.911-6.866-4.55-10.993-4.55
+	c-4.126,0-8.08,1.639-10.992,4.55L4.558,37.284c-6.077,6.075-6.077,15.909,0,21.986l171.138,171.128L4.575,401.505
+	c-6.074,6.077-6.074,15.911,0,21.986l32.709,32.719c2.911,2.911,6.865,4.55,10.992,4.55c4.127,0,8.08-1.639,10.994-4.55
+	l171.117-171.12l171.118,171.12c2.913,2.911,6.866,4.55,10.993,4.55c4.128,0,8.081-1.639,10.992-4.55l32.709-32.719
+	c6.074-6.075,6.074-15.909,0-21.986L285.08,230.397z"
+                        />
+                      </svg>
+                    </button>
+                  ))}
+              </div>
+            </div>
+
             <div className="flex w-full flex-row">
               <div className="flex w-full justify-between">
                 <div className="text-sm">
                   <span>등록 상품수</span>
                   <span className="font-bold text-orange-600">
                     {" "}
-                    {profile?.products.length}
+                    {profile?.profile?.products.length}
                   </span>
                 </div>
                 <div className="text-sm">
@@ -177,16 +254,17 @@ const Profile: NextPage<{ profile: ProfileWithProductAndReview }> = ({
                   <span>거래 성사율</span>
                   <span className="font-bold text-orange-600">
                     {" "}
-                    {Math.round(
-                      ((profile?.products
-                        .map((product) =>
-                          product?.onSale ? (0 as number) : (1 as number)
-                        )
-                        .reduce((sum, currValue) => sum + currValue, 0) *
-                        100) /
-                        (profile?.products.length || 1)) *
-                        10
-                    ) / 10}
+                    {profile?.profile &&
+                      Math.round(
+                        ((profile?.profile?.products
+                          .map((product) =>
+                            product?.onSale ? (0 as number) : (1 as number)
+                          )
+                          .reduce((sum, currValue) => sum + currValue, 0) *
+                          100) /
+                          (profile?.profile?.products.length || 1)) *
+                          10
+                      ) / 10}
                     %
                   </span>
                 </div>
@@ -194,8 +272,8 @@ const Profile: NextPage<{ profile: ProfileWithProductAndReview }> = ({
             </div>
           </div>
         </div>
-        {me?.id !== profile?.id && (
-          <FloatingButton href={`/report/${profile?.id}`}>
+        {me?.id !== profile?.profile?.id && (
+          <FloatingButton href={`/report/${profile?.profile?.id}`}>
             <svg
               className="h-6 w-6"
               fill="none"
@@ -212,7 +290,7 @@ const Profile: NextPage<{ profile: ProfileWithProductAndReview }> = ({
             </svg>
           </FloatingButton>
         )}
-        {profile?.products.length !== 0 && (
+        {profile?.profile?.products.length !== 0 && (
           <>
             <div className="flex flex-row border-b p-5">
               <div className="flex w-40 flex-col items-center justify-center">
@@ -409,8 +487,8 @@ const Profile: NextPage<{ profile: ProfileWithProductAndReview }> = ({
                 </>
               )}
             </button>
-            {state.printReview &&
-              reviews?.reviews &&
+            {reviews?.reviews &&
+              state.printReview &&
               reviews?.reviews.map((review) => (
                 <div
                   key={review.id}
@@ -473,7 +551,7 @@ const Profile: NextPage<{ profile: ProfileWithProductAndReview }> = ({
               ))}
           </div>
         )}
-        {me?.manager && reports?.reports.length !== 0 && (
+        {reports?.reports.length !== 0 && me?.manager && (
           <div className="flex flex-col justify-end divide-y border-b-2">
             <button
               className="flex items-center justify-end space-x-2 p-4 text-sm text-gray-500 hover:text-black"
@@ -534,10 +612,7 @@ const Profile: NextPage<{ profile: ProfileWithProductAndReview }> = ({
                 >
                   <h2 className="flex w-full font-bold">[ {report?.title} ]</h2>
                   {report?.description && (
-                    <a className="flex w-full text-sm">
-                      {report?.description &&
-                        "매우긴텍스트매우긴텍스트매우긴텍스트매우긴텍스트매우긴텍스트매우긴텍스트매우긴텍스트매우긴텍스트매우긴텍스트매우긴텍스트매우긴텍스트매우긴텍스트매우긴텍스트매우긴텍스트매우긴텍스트매우긴텍스트매우긴텍스트매우긴텍스트매우긴텍스트매우긴텍스트매우긴텍스트매우긴텍스트매우긴텍스트매우긴텍스트매우긴텍스트매우긴텍스트매우긴텍스트매우긴텍스트매우긴텍스트매우긴텍스트매우긴텍스트"}
-                    </a>
+                    <a className="flex w-full text-sm">{report?.description}</a>
                   )}
                   {report?.createdAt && (
                     <span className="flex w-full justify-end text-xs">
@@ -557,14 +632,42 @@ const Profile: NextPage<{ profile: ProfileWithProductAndReview }> = ({
   );
 };
 
+const Page: NextPage<{ profile: ProfileResponse; id: string }> = ({
+  profile,
+  id,
+}) => {
+  const url = "/api/profile/" + id;
+
+  return (
+    <SWRConfig
+      value={{
+        fallback: {
+          [url]: {
+            ok: true,
+            profile,
+          },
+        },
+      }}
+    >
+      <Profile />
+    </SWRConfig>
+  );
+};
+
 export const getServerSideProps: GetServerSideProps = withSsrSession(
   async (context: NextPageContext) => {
     // get request id
     const { id } = context.query;
 
+    if (!parseInt(id as string) && parseInt(id as string) !== 0) {
+      return {
+        notFound: true,
+      };
+    }
+
     // Read profile with user id value
     const profile = await client.user.findUnique({
-      where: { id: Number(id) },
+      where: { id: parseInt(id as string) },
       include: {
         login: {
           select: {
@@ -590,12 +693,19 @@ export const getServerSideProps: GetServerSideProps = withSsrSession(
         },
       },
     });
+
+    if (!profile) {
+      return {
+        notFound: true,
+      };
+    }
     return {
       props: {
         profile: JSON.parse(JSON.stringify(profile)),
+        id,
       },
     };
   }
 );
 
-export default Profile;
+export default Page;

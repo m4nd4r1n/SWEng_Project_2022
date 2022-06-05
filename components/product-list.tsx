@@ -1,4 +1,4 @@
-import { ProductWithCount } from "pages";
+import { ProductWithCountAndAddress } from "pages";
 import useSWR from "swr";
 import Item from "./item";
 
@@ -8,7 +8,7 @@ interface ProductListProps {
 
 interface Record {
   id: number;
-  product: ProductWithCount;
+  product: ProductWithCountAndAddress;
 }
 
 interface ProductListResponse {
@@ -25,6 +25,10 @@ export default function ProductList({ kind }: ProductListProps) {
           key={record.id}
           title={record.product.name}
           price={record.product.price}
+          categoryId={record.product.categoryId}
+          address={
+            record.product.address.sido + " " + record.product.address.sigungu
+          }
           hearts={record.product._count.favs}
           image={record.product.image}
         />

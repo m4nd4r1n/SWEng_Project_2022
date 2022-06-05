@@ -12,6 +12,10 @@ async function handler(
     query: { roomId },
   } = req;
 
+  if (!parseInt(roomId as string) && parseInt(roomId as string) !== 0) {
+    return res.json({ ok: false, error: "'roomId' is not a number." });
+  }
+
   const isJoined = await client.join.findFirst({
     where: {
       roomId: +roomId,
@@ -19,7 +23,9 @@ async function handler(
     },
   });
   if (!isJoined) {
-    return res.status(400).json({ ok: false });
+    return res
+      .status(400)
+      .json({ ok: false, error: "There is no room joined with that id." });
   }
 
   const participant = await client.join.findFirst({

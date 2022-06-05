@@ -1,4 +1,4 @@
-import type { NextPage } from "next";
+import type { GetServerSideProps, NextPage, NextPageContext } from "next";
 import { useRouter } from "next/router";
 import useMutation from "@libs/client/useMutation";
 import Button from "@components/button";
@@ -7,8 +7,8 @@ import Layout from "@components/layout";
 import TextArea from "@components/textarea";
 import { Report } from "@prisma/client";
 import { useForm } from "react-hook-form";
-import { useEffect, useRef, useState } from "react";
-import { totalmem } from "os";
+import { useEffect } from "react";
+import { withSsrSession } from "@libs/server/withSession";
 
 interface UploadReportForm {
   title: string;
@@ -27,10 +27,7 @@ const WriteReport: NextPage = () => {
   const [uploadReport, { loading, data }] =
     useMutation<UploadReportMutation>("/api/reports");
 
-  const onValid = async ({
-   title,
-   description 
-  }: UploadReportForm) => {
+  const onValid = async ({ title, description }: UploadReportForm) => {
     if (loading) return;
     console.log("User_id: " + userId);
     uploadReport({
@@ -67,5 +64,21 @@ const WriteReport: NextPage = () => {
     </Layout>
   );
 };
+
+export const getServerSideProps: GetServerSideProps = withSsrSession(
+  async (context: NextPageContext) => {
+    const { id } = context.query;
+
+    if (!parseInt(id as string) && parseInt(id as string) !== 0) {
+      return {
+        notFound: true,
+      };
+    }
+
+    return {
+      props: {},
+    };
+  }
+);
 
 export default WriteReport;
