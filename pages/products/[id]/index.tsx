@@ -4,7 +4,7 @@ import Layout from "@components/layout";
 import { useRouter } from "next/router";
 import useSWR, { SWRConfig, unstable_serialize } from "swr";
 import Link from "next/link";
-import { Product, User } from "@prisma/client";
+import { Address, Product, User } from "@prisma/client";
 import useMutation from "@libs/client/useMutation";
 import { cls } from "@libs/client/utils";
 import useUser from "@libs/client/useUser";
@@ -13,12 +13,13 @@ import { useEffect } from "react";
 import { withSsrSession } from "@libs/server/withSession";
 import client from "@libs/server/client";
 
-interface ProductWithUser extends Product {
+interface ProductWithUserAndAddress extends Product {
   user: User;
+  address: Address;
 }
 interface ItemDetailResponse {
   ok: boolean;
-  product: ProductWithUser;
+  product: ProductWithUserAndAddress;
   relatedProducts: Product[];
   isLiked: boolean;
 }
@@ -68,9 +69,16 @@ const ItemDetail: NextPage = () => {
             <div className="flex flex-row space-x-3">
               <div className="">
                 {data ? (
-                  <p className="text-sm font-medium text-gray-700">
-                    {data?.product?.user?.name}
-                  </p>
+                  <div>
+                    <p className="text-sm font-medium text-gray-700">
+                      {data?.product?.user?.name}
+                    </p>
+                    <p className="text-xs font-medium text-gray-400">
+                      {data?.product?.address?.sido +
+                        " " +
+                        data?.product?.address?.sigungu}
+                    </p>
+                  </div>
                 ) : (
                   <div className="h-5 animate-pulse rounded-md bg-slate-300" />
                 )}
@@ -81,39 +89,46 @@ const ItemDetail: NextPage = () => {
                 </Link>
               </div>
             </div>
-            <div className="flex pr-4">
+            <div className="flex flex-col items-end space-y-5">
               {(me?.manager || me?.id === data?.product?.userId) && (
-                <button
-                  className="text-gray-500 hover:text-gray-700"
-                  onClick={() => {
-                    if (
-                      window.confirm(
-                        `'${data?.product?.name}' 상품을 삭제하겠습니까?`
-                      )
-                    ) {
-                      fetch(`/api/products/${data?.product?.id}`, {
-                        method: "DELETE",
-                      }).then(() => router.back());
-                    }
-                  }}
-                >
-                  <svg
-                    className="h-4 w-4"
-                    fill="currentColor"
-                    stroke="currentColor"
-                    xmlns="http://www.w3.org/2000/svg"
-                    viewBox="0 0 460.775 460.775"
+                <>
+                  <button
+                    className="text-gray-500 hover:text-gray-700"
+                    onClick={() => {
+                      if (
+                        window.confirm(
+                          `'${data?.product?.name}' 상품을 삭제하겠습니까?`
+                        )
+                      ) {
+                        fetch(`/api/products/${data?.product?.id}`, {
+                          method: "DELETE",
+                        }).then(() => router.back());
+                      }
+                    }}
                   >
-                    <path
-                      d="M285.08,230.397L456.218,59.27c6.076-6.077,6.076-15.911,0-21.986L423.511,4.565c-2.913-2.911-6.866-4.55-10.992-4.55
+                    <svg
+                      className="h-4 w-4"
+                      fill="currentColor"
+                      stroke="currentColor"
+                      xmlns="http://www.w3.org/2000/svg"
+                      viewBox="0 0 460.775 460.775"
+                    >
+                      <path
+                        d="M285.08,230.397L456.218,59.27c6.076-6.077,6.076-15.911,0-21.986L423.511,4.565c-2.913-2.911-6.866-4.55-10.992-4.55
 	c-4.127,0-8.08,1.639-10.993,4.55l-171.138,171.14L59.25,4.565c-2.913-2.911-6.866-4.55-10.993-4.55
 	c-4.126,0-8.08,1.639-10.992,4.55L4.558,37.284c-6.077,6.075-6.077,15.909,0,21.986l171.138,171.128L4.575,401.505
 	c-6.074,6.077-6.074,15.911,0,21.986l32.709,32.719c2.911,2.911,6.865,4.55,10.992,4.55c4.127,0,8.08-1.639,10.994-4.55
 	l171.117-171.12l171.118,171.12c2.913,2.911,6.866,4.55,10.993,4.55c4.128,0,8.081-1.639,10.992-4.55l32.709-32.719
 	c6.074-6.075,6.074-15.909,0-21.986L285.08,230.397z"
-                    />
-                  </svg>
-                </button>
+                      />
+                    </svg>
+                  </button>
+                  <Link href={`/products/${data?.product?.id}/edit`}>
+                    <a className="text-xs font-medium text-gray-500">
+                      Edit product &rarr;
+                    </a>
+                  </Link>
+                </>
               )}
             </div>
           </div>

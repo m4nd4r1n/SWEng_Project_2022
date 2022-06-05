@@ -51,7 +51,6 @@ export const address = {
   sigungu: "성남시 분당구",
 };
 
-
 export const products = categories
   .map((category) => {
     let products: {
@@ -74,7 +73,7 @@ export const products = categories
           price: +((Math.random() + 0.1) * 10).toFixed(0) * 10000,
           description: `${i}번째 ${category.name} 상품`,
           categoryId: category.id,
-          addressId: 41137,
+          addressId: 41135,
         },
       ];
     }

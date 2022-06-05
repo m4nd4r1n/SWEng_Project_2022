@@ -3,6 +3,7 @@ import React, { useMemo } from "react";
 
 interface DropdownProps {
   type: string;
+  value: string;
   isProduct?: boolean;
   spaceholder?: string;
   selectRef?: React.RefObject<HTMLSelectElement>;
@@ -11,6 +12,7 @@ interface DropdownProps {
 
 export default function Dropdown({
   type,
+  value,
   isProduct = false,
   spaceholder,
   selectRef,
@@ -102,6 +104,7 @@ export default function Dropdown({
         )}
         onChange={handleChangeSelect}
         ref={selectRef}
+        value={value ?? ""}
       >
         <option className="bg-orange-100 font-semibold" value="">
           {spaceholder}

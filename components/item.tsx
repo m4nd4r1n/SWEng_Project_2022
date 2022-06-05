@@ -1,15 +1,26 @@
 import Image from "next/image";
 import Link from "next/link";
+import { categories } from "./../prisma/data";
 
 interface ItemProps {
   title: string;
   id: number;
   price: number;
+  categoryId: number;
+  address: string;
   hearts: number;
   image: string | undefined;
 }
 
-export default function Item({ title, price, hearts, id, image }: ItemProps) {
+export default function Item({
+  title,
+  price,
+  categoryId,
+  address,
+  hearts,
+  id,
+  image,
+}: ItemProps) {
   return (
     <Link href={`/products/${id}`}>
       <a className="flex cursor-pointer justify-between px-4 pt-5">
@@ -28,6 +39,11 @@ export default function Item({ title, price, hearts, id, image }: ItemProps) {
           )}
           <div className="flex flex-col pt-2">
             <h3 className="text-sm font-medium text-gray-900">{title}</h3>
+            <span className="mt-1 text-xs font-medium text-gray-400">
+              {categories.find((category) => category.id === categoryId)?.name}
+              {"ㆍ"}
+              {address}
+            </span>
             <span className="mt-1 font-medium text-gray-900">${price}</span>
           </div>
         </div>
