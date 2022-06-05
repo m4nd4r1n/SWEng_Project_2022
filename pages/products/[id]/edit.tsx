@@ -105,12 +105,29 @@ const EditProduct: NextPage<{ product: Product }> = ({ product }) => {
       <form className="space-y-4 p-4" onSubmit={handleSubmit(onValid)}>
         <div className="relative h-80 w-full">
           {photoPreview ? (
-            <Image
-              src={photoPreview}
-              layout="fill"
-              objectFit="contain"
-              alt=""
-            />
+            <div className="felx h-full">
+              <Image
+                src={photoPreview}
+                layout="fill"
+                objectFit="contain"
+                alt=""
+              />
+              <div className="flex h-full items-end justify-end">
+                <label
+                  htmlFor="picture"
+                  className="z-10 cursor-pointer rounded-md border border-gray-300 py-2 px-3 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:ring-2 focus:ring-orange-500 focus:ring-offset-2"
+                >
+                  Change
+                  <input
+                    {...register("photo")}
+                    id="picture"
+                    type="file"
+                    className="hidden"
+                    accept="image/*"
+                  />
+                </label>
+              </div>
+            </div>
           ) : (
             <label className="flex h-80 w-full cursor-pointer items-center justify-center rounded-md border-2 border-dashed border-gray-300 text-gray-600 hover:border-orange-500 hover:text-orange-500">
               <svg
@@ -135,21 +152,6 @@ const EditProduct: NextPage<{ product: Product }> = ({ product }) => {
               />
             </label>
           )}
-          <div className="flex h-full items-end justify-end">
-            <label
-              htmlFor="picture"
-              className="z-10 cursor-pointer rounded-md border border-gray-300 py-2 px-3 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:ring-2 focus:ring-orange-500 focus:ring-offset-2"
-            >
-              Change
-              <input
-                {...register("photo")}
-                id="picture"
-                type="file"
-                className="hidden"
-                accept="image/*"
-              />
-            </label>
-          </div>
         </div>
         <div>
           <Dropdown
