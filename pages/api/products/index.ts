@@ -12,6 +12,7 @@ async function handler(
   if (req.method === "GET") {
     const {
       session: { user },
+      query: { page },
     } = req;
     const views = await client.view.findMany({
       where: {
@@ -35,6 +36,8 @@ async function handler(
       orderBy: {
         createdAt: "desc",
       },
+      take: 15,
+      skip: 15 * +page,
     });
     if (views.length === 0) {
       return res.json({

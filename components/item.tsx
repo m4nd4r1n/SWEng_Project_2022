@@ -10,6 +10,7 @@ interface ItemProps {
   address: string;
   hearts: number;
   image: string | undefined;
+  onClick?: () => void;
 }
 
 export default function Item({
@@ -20,10 +21,14 @@ export default function Item({
   hearts,
   id,
   image,
+  onClick,
 }: ItemProps) {
   return (
     <Link href={`/products/${id}`}>
-      <a className="flex cursor-pointer justify-between px-4 pt-5">
+      <a
+        className="flex cursor-pointer justify-between px-4 pt-5"
+        onClick={onClick}
+      >
         <div className="flex space-x-4">
           {image ? (
             <Image
