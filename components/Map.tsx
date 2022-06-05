@@ -1,10 +1,17 @@
-import styled from "styled-components";
+import tw from "tailwind-styled-components";
 import { useEffect } from "react";
 
 interface MapProps {
   latitude: number;
   longitude: number;
 }
+
+const MapContainer = tw.div`
+  border
+  border-gray-400
+  rounded-lg
+  aspect-[320/220]
+`;
 
 function Map({ latitude, longitude }: MapProps) {
   useEffect(() => {
@@ -23,7 +30,10 @@ function Map({ latitude, longitude }: MapProps) {
           center: new window.kakao.maps.LatLng(latitude, longitude),
         };
         const map = new window.kakao.maps.Map(container, options);
-        const markerPosition = new window.kakao.maps.LatLng(latitude, longitude);
+        const markerPosition = new window.kakao.maps.LatLng(
+          latitude,
+          longitude
+        );
         const marker = new window.kakao.maps.Marker({
           position: markerPosition,
         });
@@ -35,13 +45,7 @@ function Map({ latitude, longitude }: MapProps) {
     return () => mapScript.removeEventListener("load", onLoadKakaoMap);
   }, [latitude, longitude]);
 
-  return (
-    <MapContainer id="map" />
-  );
+  return <MapContainer id="map" />;
 }
-
-const MapContainer = styled.div`
-  aspect-ratio: 320 / 220;
-`;
 
 export default Map;

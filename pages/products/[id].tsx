@@ -106,15 +106,7 @@ const ItemDetail: NextPage = () => {
                 <div className="my-6 h-4 animate-pulse rounded-md bg-slate-300" />
               </>
             )}
-            {/* KAKAO Map */}
-            <div className="mt-full">
-              {(data?.product?.latitude) && (data?.product?.longitude) ? (
-                <Map latitude={data?.product?.latitude} longitude={data?.product?.longitude}/>
-              ) : (
-                <Map latitude={test_la} longitude={test_lo}/>
-              )}
-            </div>
-            <div className="flex items-center justify-between space-x-2">
+            <div className="mb-2 flex items-center justify-between space-x-2">
               <Button
                 onClick={onChatClick}
                 text="Talk to seller"
@@ -129,7 +121,6 @@ const ItemDetail: NextPage = () => {
                     : "text-gray-400  hover:text-gray-500"
                 )}
               >
-                
                 {data?.isLiked ? (
                   <svg
                     className="h-6 w-6"
@@ -161,7 +152,17 @@ const ItemDetail: NextPage = () => {
                   </svg>
                 )}
               </button>
-              
+            </div>
+            {/* KAKAO Map */}
+            <div className="mt-full">
+              {data?.product?.latitude && data?.product?.longitude ? (
+                <Map
+                  latitude={data?.product?.latitude}
+                  longitude={data?.product?.longitude}
+                />
+              ) : (
+                <Map latitude={test_la} longitude={test_lo} />
+              )}
             </div>
           </div>
         </div>
