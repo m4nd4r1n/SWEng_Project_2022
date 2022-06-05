@@ -12,6 +12,7 @@ import Image from "next/image";
 import { inNumber } from "@libs/client/utils";
 import useAddress from "@libs/client/useAddress";
 import Dropdown from "@components/dropdown";
+import useCoords from "@libs/client/useCoords";
 
 interface UploadProductForm {
   name: string;
@@ -33,6 +34,7 @@ const Upload: NextPage = () => {
   const { register, handleSubmit, watch } = useForm<UploadProductForm>();
   const [uploadProduct, { loading, data }] =
     useMutation<UploadProductMutation>("/api/products");
+  const { latitude, longitude } = useCoords();
   const onValid = async ({
     name,
     price,
@@ -60,6 +62,8 @@ const Upload: NextPage = () => {
         sido,
         sigungu,
         categoryId: catId,
+        latitude,
+        longitude,
       });
     } else {
       uploadProduct({
@@ -70,6 +74,8 @@ const Upload: NextPage = () => {
         sido,
         sigungu,
         categoryId: catId,
+        latitude,
+        longitude,
       });
     }
   };

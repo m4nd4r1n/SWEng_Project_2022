@@ -33,16 +33,19 @@ async function handler(
         sido,
         sigungu,
         categoryId,
+        latitude,
+        longitude,
       },
       session: { user },
     } = req;
-
     const product = await client.product.create({
       data: {
         name,
         price: +price,
         description,
         image: photoId || "",
+        latitude: latitude,
+        longitude: longitude,
         user: {
           connect: {
             id: user?.id,
