@@ -1,5 +1,7 @@
 import { cls } from "@libs/client/utils";
+import { Review } from "@prisma/client";
 import Image from "next/image";
+import { useRouter } from "next/router";
 
 interface Product {
   id: number;
@@ -16,9 +18,11 @@ interface MessageProps {
   reversed?: boolean;
   avatarUrl?: string;
   purchase?: boolean;
-  onClick?: () => void;
+  sell?: () => void;
   isSale?: boolean;
   product?: Product;
+  review?: boolean;
+  isReviewed?: Review;
 }
 
 export default function Message({
@@ -26,10 +30,13 @@ export default function Message({
   avatarUrl,
   reversed,
   purchase,
-  onClick,
+  sell,
   isSale,
   product,
+  review,
+  isReviewed,
 }: MessageProps) {
+  const router = useRouter();
   return (
     <div
       className={cls(
@@ -66,15 +73,45 @@ export default function Message({
               </div>
             </div>
             <button
-              onClick={onClick}
+              onClick={sell}
               className={cls(
                 "mt-2 h-8 rounded",
                 reversed ? "bg-gray-200" : "bg-orange-400 text-white",
-                !isSale ? "bg-gray-200" : ""
+                !isSale ? "bg-gray-200 text-gray-800" : ""
               )}
               disabled={reversed || !isSale}
             >
-              {reversed ? "요청 보냄" : isSale ? "판매하기" : "판매완료"}
+              {reversed
+                ? isSale
+                  ? "요청 보냄"
+                  : "구매완료"
+                : isSale
+                ? "판매하기"
+                : "판매완료"}
+            </button>
+          </>
+        )}
+        {review && (
+          <>
+            <button
+              onClick={() =>
+                router.push(
+                  `/chats/review/${product?.userId}?productId=${product?.id}`
+                )
+              }
+              className={cls(
+                "mt-2 h-8 rounded",
+                reversed || Boolean(isReviewed)
+                  ? "bg-gray-200"
+                  : "bg-orange-400 text-white"
+              )}
+              disabled={reversed || Boolean(isReviewed)}
+            >
+              {!reversed
+                ? isReviewed
+                  ? "작성 완료"
+                  : "리뷰 남기기"
+                : "요청 보냄"}
             </button>
           </>
         )}

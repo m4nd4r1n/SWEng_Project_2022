@@ -19,7 +19,7 @@ export default function Button({
     <button
       {...rest}
       className={cls(
-        "w-full rounded-md border border-transparent  px-4 font-medium text-white shadow-sm  focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2",
+        "w-full rounded-md border border-transparent px-4 font-medium text-white shadow-sm  transition focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2",
         large ? "py-3 text-base" : "py-2 text-sm ",
         disabled ? "bg-gray-300" : "bg-orange-500 hover:bg-orange-600"
       )}

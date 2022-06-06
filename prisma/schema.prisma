@@ -170,15 +170,17 @@ model Wondering {
 }
 
 model Review {
-  id           Int      @id @default(autoincrement())
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
-  review       String   @db.MediumText
-  createdBy    User     @relation("writtenReviews", fields: [createdById], references: [id], onDelete: Cascade)
+  id           Int       @id @default(autoincrement())
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+  review       String    @db.MediumText
+  createdBy    User      @relation("writtenReviews", fields: [createdById], references: [id], onDelete: Cascade)
   createdById  Int
-  createdFor   User     @relation("receivedReviews", fields: [createdForId], references: [id], onDelete: Cascade)
+  createdFor   User      @relation("receivedReviews", fields: [createdForId], references: [id], onDelete: Cascade)
   createdForId Int
-  score        Int      @default(1)
+  score        Int       @default(1)
+  Sale         Sale?
+  Purchase     Purchase?
 
   @@index([createdById])
   @@index([createdForId])
@@ -204,9 +206,12 @@ model Sale {
   productId Int
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+  review    Review?  @relation(fields: [reviewId], references: [id], onDelete: Cascade)
+  reviewId  Int?     @unique
 
   @@index([productId])
   @@index([userId])
+  @@index([reviewId])
 }
 
 model Purchase {
@@ -217,9 +222,12 @@ model Purchase {
   productId Int
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+  review    Review?  @relation(fields: [reviewId], references: [id], onDelete: Cascade)
+  reviewId  Int?     @unique
 
   @@index([productId])
   @@index([userId])
+  @@index([reviewId])
 }
 
 model Stream {
