@@ -6,6 +6,7 @@ export type ModalBaseProps = {
   active: boolean;
   closeEvent?: (e?: React.MouseEvent<HTMLDivElement>) => void;
   children: React.ReactNode;
+  isProductList?: boolean;
 };
 
 const ModalBaseContainer = tw.div`
@@ -26,6 +27,7 @@ export default function ModalBase({
   active,
   closeEvent,
   children,
+  isProductList,
 }: ModalBaseProps) {
   const [closed, setClosed] = useState(true);
   useEffect(() => {
@@ -62,8 +64,9 @@ export default function ModalBase({
       />
       <div
         className={cls(
-          "relative z-10 w-full max-w-[400px] overflow-hidden rounded-2xl bg-white p-8 shadow-[rgba(149,157,165,0.2)_0px_8px_24px]",
-          active ? "animate-popin" : "animate-popout"
+          "relative z-10 w-full max-w-[400px] overflow-y-scroll rounded-2xl bg-white p-8 shadow-[rgba(149,157,165,0.2)_0px_8px_24px] scrollbar-hide",
+          active ? "animate-popin" : "animate-popout",
+          isProductList ? "h-96" : ""
         )}
       >
         {children}

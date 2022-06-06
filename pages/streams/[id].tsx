@@ -3,7 +3,7 @@ import Layout from "@components/layout";
 import Message from "@components/message";
 import useSWR from "swr";
 import { useRouter } from "next/router";
-import { Stream } from "@prisma/client";
+import { Product, Stream } from "@prisma/client";
 import { useForm } from "react-hook-form";
 import useMutation from "@libs/client/useMutation";
 import useUser from "@libs/client/useUser";
@@ -12,6 +12,7 @@ import { CardModal } from "@components/cardModal";
 import { useState } from "react";
 import { withSsrSession } from "@libs/server/withSession";
 import client from "@libs/server/client";
+import Image from "next/image";
 
 interface StreamMessage {
   message: string;
@@ -39,13 +40,22 @@ interface MessageForm {
   message: string;
 }
 
+interface ProductListResponse {
+  ok: boolean;
+  productList: Product[];
+}
+
 const Streams: NextPage = () => {
   const { user } = useUser();
   const router = useRouter();
+  const [reveal, setReveal] = useState(false);
   const { register, handleSubmit, reset } = useForm<MessageForm>();
   const { data, mutate } = useSWR<StreamResponse>(
     router.query.id ? `/api/streams/${router.query.id}` : null,
     { refreshInterval: 1000 }
+  );
+  const { data: products } = useSWR<ProductListResponse>(
+    router.query.id ? `/api/streams/${router.query.id}/products` : null
   );
   const [sendMessage, { loading, data: sendMessageData }] = useMutation(
     `/api/streams/${router.query.id}/messages`
@@ -83,44 +93,107 @@ const Streams: NextPage = () => {
   return (
     <Layout canGoBack seoTitle="Stream Detail">
       <div className="space-y-4 px-4  pb-10">
-        {data?.stream?.live ? (
-          <h1 className="text-3xl font-bold text-gray-900">Live</h1>
-        ) : (
-          <h1 className="text-3xl font-bold text-gray-900">최근 진행된 Live</h1>
-        )}
-        {data?.stream?.cloudflareId ? (
-          <iframe
-            className="aspect-video w-full rounded-md shadow-sm"
-            src={
-              data?.stream?.live
-                ? `https://iframe.videodelivery.net/${
-                    data?.stream?.cloudflareId
-                  }?poster=${encodeURIComponent(
-                    `https://videodelivery.net/${data?.stream.cloudflareId}/thumbnails/thumbnail.jpg?height=320`
-                  )}`
-                : data?.stream?.preview
-            }
-            allow="gyroscope; autoplay; encrypted-media; picture-in-picture;"
-            allowFullScreen={true}
-          ></iframe>
-        ) : null}
+        <h1 className="text-3xl font-bold text-gray-900">
+          {data?.stream?.live
+            ? "Live"
+            : data?.stream?.preview
+            ? "최근 진행된 Live"
+            : data
+            ? "Live 준비 중 입니다."
+            : "Loading..."}
+        </h1>
+        {data?.stream?.cloudflareId
+          ? (data?.stream?.live || data?.stream?.preview) && (
+              <iframe
+                className="aspect-video w-full rounded-md shadow-sm"
+                src={
+                  data?.stream?.live
+                    ? `https://iframe.videodelivery.net/${
+                        data?.stream?.cloudflareId
+                      }?poster=${encodeURIComponent(
+                        `https://videodelivery.net/${data?.stream.cloudflareId}/thumbnails/thumbnail.jpg?height=320`
+                      )}`
+                    : data?.stream?.preview
+                }
+                allow="gyroscope; autoplay; encrypted-media; picture-in-picture;"
+                allowFullScreen={true}
+              ></iframe>
+            )
+          : null}
         <div className="mt-5">
           <h1 className="text-3xl font-bold text-gray-900">
             {data?.stream?.name}
           </h1>
           <span className="mt-3 block text-2xl text-gray-900">
-            ${data?.stream?.price}
+            ₩{data?.stream?.price}
           </span>
           <p className="my-6 text-gray-700">{data?.stream?.description}</p>
-          {data?.stream?.userId === user?.id && (
-            <button
-              className="rounded-lg bg-orange-400 p-2 text-white transition hover:bg-orange-500"
-              onClick={handleModal}
-            >
-              Stream Key 보기
-            </button>
-          )}
         </div>
+
+        <div className="border-y p-2">
+          <div className="flex justify-between">
+            {data?.stream?.userId === user?.id && (
+              <button
+                className="text-gray-500 transition hover:text-orange-500"
+                onClick={handleModal}
+              >
+                Stream Key 보기
+              </button>
+            )}
+            {products?.productList.length !== 0 && (
+              <button
+                className="ml-auto text-gray-500 transition hover:text-gray-900"
+                onClick={() => setReveal(true)}
+              >
+                판매 상품 목록 보기
+              </button>
+            )}
+          </div>
+        </div>
+
+        <ModalBase
+          active={reveal}
+          closeEvent={() => setReveal(false)}
+          isProductList
+        >
+          <CardModal
+            closeEvent={() => setReveal(false)}
+            title="판매 상품 목록"
+            actionMsg="확인"
+          >
+            {products?.productList?.map(
+              (product) =>
+                product.onSale && (
+                  <div
+                    className="flex cursor-pointer border-t p-2"
+                    key={product.id}
+                    onClick={() => router.push(`/products/${product.id}`)}
+                  >
+                    <div className="flex">
+                      {product.image ? (
+                        <Image
+                          className="rounded-lg bg-slate-100"
+                          src={`https://imagedelivery.net/mBDIPXvPr-qhWpouLgwjOQ/${product.image}/avatar`}
+                          height={48}
+                          width={48}
+                          alt=""
+                        />
+                      ) : (
+                        <div className="h-12 w-12 rounded-lg bg-slate-100" />
+                      )}
+                    </div>
+
+                    <div className="ml-4 flex flex-col">
+                      <span className="text-gray-800">{product.name}</span>
+                      <span className="text-sm text-gray-800">
+                        ₩{product.price}
+                      </span>
+                    </div>
+                  </div>
+                )
+            )}
+          </CardModal>
+        </ModalBase>
         <ModalBase active={isActive} closeEvent={onClickModalOff}>
           <CardModal
             closeEvent={onClickModalOff}
@@ -136,7 +209,9 @@ const Streams: NextPage = () => {
           </CardModal>
         </ModalBase>
         <div>
-          <h2 className="text-2xl font-bold text-gray-900">Live Chat</h2>
+          <h2 className="text-2xl font-bold text-gray-900">
+            {data?.stream?.live ? "Live Chat" : "Chat History"}
+          </h2>
           <div className="h-[45vh] space-y-4 overflow-y-scroll py-10  px-4 pb-16">
             {data?.stream.messages.map((message) => (
               <Message
