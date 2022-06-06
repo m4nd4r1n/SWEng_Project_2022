@@ -12,6 +12,7 @@ import Image from "next/image";
 import { useEffect } from "react";
 import { withSsrSession } from "@libs/server/withSession";
 import client from "@libs/server/client";
+import Map from "@components/Map";
 
 interface ProductWithUserAndAddress extends Product {
   user: User;
@@ -49,6 +50,10 @@ const ItemDetail: NextPage = () => {
       router.push(`/chats/${roomId?.id}`);
     }
   }, [roomId, router]);
+
+  const test_la: number = 37.6197503;
+  const test_lo: number = 127.060937;
+
   return (
     <Layout canGoBack seoTitle="Product Detail">
       <div className="px-4 py-4">
@@ -152,11 +157,9 @@ const ItemDetail: NextPage = () => {
                 <div className="my-6 h-4 animate-pulse rounded-md bg-slate-300" />
               </>
             )}
-
-            <div className="flex items-center justify-between space-x-2">
+            <div className="mb-2 flex items-center justify-between space-x-2">
               <Button
                 onClick={onChatClick}
-                large
                 text="Talk to seller"
                 disabled={me?.id === data?.product.userId}
               />
@@ -200,6 +203,17 @@ const ItemDetail: NextPage = () => {
                   </svg>
                 )}
               </button>
+            </div>
+            {/* KAKAO Map */}
+            <div className="mt-full">
+              {data?.product?.latitude && data?.product?.longitude ? (
+                <Map
+                  latitude={data?.product?.latitude}
+                  longitude={data?.product?.longitude}
+                />
+              ) : (
+                <Map latitude={test_la} longitude={test_lo} />
+              )}
             </div>
           </div>
         </div>

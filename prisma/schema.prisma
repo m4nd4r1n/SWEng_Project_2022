@@ -73,6 +73,8 @@ model Product {
   purchases   Purchase[]
   report      Report[]
   Room        Room[]
+  latitude    Float?
+  longitude   Float?
 
   @@index([userId])
   @@index([categoryId])
