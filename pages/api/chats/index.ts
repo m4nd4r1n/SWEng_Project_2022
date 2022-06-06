@@ -77,6 +77,7 @@ async function handler(
       session: { user },
     } = req;
     const ably = new Ably.Realtime(process.env.CHAT_API!);
+
     const roomList = await client.room.findMany({
       select: {
         id: true,
@@ -107,7 +108,9 @@ async function handler(
       const last = await Promise.all(
         roomList.map(async (list) => {
           const channel = ably.channels.get("persisted:" + list.id);
-          return (await channel.history({ limit: 1 })).items?.[0]?.data;
+          const data = (await channel.history({ limit: 1 })).items?.[0]?.data;
+          channel.unsubscribe();
+          return data;
         })
       );
       ably.close();

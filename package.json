@@ -12,6 +12,7 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@ably-labs/react-hooks": "^2.0.1",
     "@prisma/client": "^3.14.0",
     "@tailwindcss/forms": "^0.5.2",
     "ably": "^1.2.22",
