@@ -49,7 +49,7 @@ export default function Item({
               {"ㆍ"}
               {address}
             </span>
-            <span className="mt-1 font-medium text-gray-900">${price}</span>
+            <span className="mt-1 font-medium text-gray-900">₩{price}</span>
           </div>
         </div>
         <div className="flex items-end justify-end space-x-2">
