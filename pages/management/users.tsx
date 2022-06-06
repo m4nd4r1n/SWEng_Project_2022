@@ -122,23 +122,27 @@ const Users: NextPage = () => {
                     </div>
                     <div className="grid w-1/2 grid-cols-2">
                       <Link href={`/users/profiles/${user?.id}`}>
-                        <a className="flex items-center justify-center text-gray-400 hover:text-black">
+                        <a className="flex items-center justify-center text-gray-400 transition hover:text-black">
                           <svg
+                            className="h-14 w-14"
+                            fill="none"
                             stroke="currentColor"
-                            fill="currentColor"
+                            viewBox="0 0 24 24"
                             xmlns="http://www.w3.org/2000/svg"
-                            viewBox="0 0 50 50"
-                            width="50px"
-                            height="50px"
                           >
-                            <path d="M 25 2 C 12.309295 2 2 12.309295 2 25 C 2 37.690705 12.309295 48 25 48 C 37.690705 48 48 37.690705 48 25 C 48 12.309295 37.690705 2 25 2 z M 25 4 C 36.609824 4 46 13.390176 46 25 C 46 36.609824 36.609824 46 25 46 C 13.390176 46 4 36.609824 4 25 C 4 13.390176 13.390176 4 25 4 z M 25 11 A 3 3 0 0 0 22 14 A 3 3 0 0 0 25 17 A 3 3 0 0 0 28 14 A 3 3 0 0 0 25 11 z M 21 21 L 21 23 L 22 23 L 23 23 L 23 36 L 22 36 L 21 36 L 21 38 L 22 38 L 23 38 L 27 38 L 28 38 L 29 38 L 29 36 L 28 36 L 27 36 L 27 21 L 26 21 L 22 21 L 21 21 z" />
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth="2"
+                              d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                            ></path>
                           </svg>
                         </a>
                       </Link>
                       {user.id !== me?.id &&
                         (user?.disabled ? (
                           <div
-                            className="flex items-center justify-center text-gray-400 hover:text-black"
+                            className="flex items-center justify-center text-gray-400 transition hover:text-black"
                             onClick={() => {
                               if (
                                 window.confirm(
@@ -155,20 +159,23 @@ const Users: NextPage = () => {
                             }}
                           >
                             <svg
+                              className="h-14 w-14"
+                              fill="none"
                               stroke="currentColor"
-                              fill="currentColor"
-                              width="50px"
-                              height="50px"
-                              viewBox="0 0 32 32"
-                              id="icon"
+                              viewBox="0 0 24 24"
                               xmlns="http://www.w3.org/2000/svg"
                             >
-                              <path d="M18,28A12,12,0,1,0,6,16v6.2L2.4,18.6,1,20l6,6,6-6-1.4-1.4L8,22.2V16H8A10,10,0,1,1,18,26Z" />
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth="2"
+                                d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
+                              ></path>
                             </svg>
                           </div>
                         ) : (
                           <div
-                            className="flex items-center justify-center text-gray-400 hover:text-red-600"
+                            className="flex items-center justify-center text-gray-400 transition hover:text-red-600"
                             onClick={() => {
                               if (
                                 window.confirm(
@@ -185,18 +192,18 @@ const Users: NextPage = () => {
                             }}
                           >
                             <svg
+                              className="h-14 w-14"
+                              fill="none"
                               stroke="currentColor"
-                              fill="currentColor"
+                              viewBox="0 0 24 24"
                               xmlns="http://www.w3.org/2000/svg"
-                              viewBox="0 0 48 48"
-                              width="50px"
-                              height="50px"
                             >
                               <path
-                                d="M5.7 22H42.5V26H5.7z"
-                                transform="rotate(-45.001 24.036 24.037)"
-                              />
-                              <path d="M24,4C13,4,4,13,4,24s9,20,20,20s20-9,20-20S35,4,24,4z M24,40c-8.8,0-16-7.2-16-16S15.2,8,24,8 s16,7.2,16,16S32.8,40,24,40z" />
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth="2"
+                                d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"
+                              ></path>
                             </svg>
                           </div>
                         ))}
