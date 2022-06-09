@@ -13,12 +13,14 @@ import { inNumber } from "@libs/client/utils";
 import useAddress from "@libs/client/useAddress";
 import Dropdown from "@components/dropdown";
 import useCoords from "@libs/client/useCoords";
+import Error from "@components/error";
 
 interface UploadProductForm {
   name: string;
   price: string;
   description: string;
   photo: FileList;
+  catId: string;
 }
 
 interface UploadProductMutation {
@@ -29,9 +31,20 @@ interface UploadProductMutation {
 const Upload: NextPage = () => {
   const router = useRouter();
   const { id: addressId, sido, sigungu } = useAddress();
-  const [catId, setCatId] = useState("");
   const selectRef = useRef<HTMLSelectElement>(null);
-  const { register, handleSubmit, watch } = useForm<UploadProductForm>();
+  const {
+    register,
+    handleSubmit,
+    watch,
+    setValue,
+    setError,
+    clearErrors,
+    formState: { errors },
+  } = useForm<UploadProductForm>({
+    mode: "onChange",
+    defaultValues: { catId: "" },
+  });
+  const catId = watch("catId");
   const [uploadProduct, { loading, data }] =
     useMutation<UploadProductMutation>("/api/products");
   const { latitude, longitude } = useCoords();
@@ -42,10 +55,6 @@ const Upload: NextPage = () => {
     photo,
   }: UploadProductForm) => {
     if (loading) return;
-    if (!catId) {
-      selectRef.current?.focus();
-      return;
-    }
     if (photo && photo.length > 0) {
       const { uploadURL } = await (await fetch(`/api/files`)).json();
       const form = new FormData();
@@ -92,17 +101,47 @@ const Upload: NextPage = () => {
       setPhotoPreview(URL.createObjectURL(file));
     }
   }, [photo]);
+
+  useEffect(() => {
+    if (!catId) {
+      setError("catId", {
+        type: "validate",
+        message: "카테고리를 선택해 주세요.",
+      });
+    }
+    if (catId) {
+      clearErrors("catId");
+    }
+  }, [catId, setError, clearErrors]);
+
   return (
     <Layout canGoBack title="Upload Product" seoTitle="Product Upload">
       <form className="space-y-4 p-4" onSubmit={handleSubmit(onValid)}>
         <div className="relative h-80 w-full">
           {photoPreview ? (
-            <Image
-              src={photoPreview}
-              layout="fill"
-              objectFit="contain"
-              alt=""
-            />
+            <>
+              <Image
+                src={photoPreview}
+                layout="fill"
+                objectFit="contain"
+                alt=""
+              />
+              <div className="z-50 flex h-full items-end justify-end">
+                <label
+                  htmlFor="picture"
+                  className="z-10 cursor-pointer rounded-md border border-gray-300 bg-white py-2  px-3 text-sm font-medium text-gray-700 shadow-sm transition hover:bg-gray-50 focus:ring-2 focus:ring-orange-500 focus:ring-offset-2"
+                >
+                  Change
+                  <input
+                    {...register("photo")}
+                    id="picture"
+                    type="file"
+                    className="hidden"
+                    accept="image/*"
+                  />
+                </label>
+              </div>
+            </>
           ) : (
             <label className="flex h-80 w-full cursor-pointer items-center justify-center rounded-md border-2 border-dashed border-gray-300 text-gray-600 hover:border-orange-500 hover:text-orange-500">
               <svg
@@ -135,18 +174,24 @@ const Upload: NextPage = () => {
             isProduct={true}
             spaceholder="카테고리"
             selectRef={selectRef}
-            handleChangeSelect={(e) => setCatId(e.target.value)}
+            handleChangeSelect={(e) => setValue("catId", e.target.value)}
           />
         </div>
+        {errors.catId && <Error>{errors.catId?.message}</Error>}
         <Input
-          register={register("name", { required: true })}
+          register={register("name", {
+            required: "상품명을 입력해 주세요.",
+          })}
           required
-          label="Name"
-          name="name"
+          label="Product name"
+          name="product"
           type="text"
         />
+        {errors.name && <Error>{errors.name?.message}</Error>}
         <Input
-          register={register("price", { required: true })}
+          register={register("price", {
+            required: "가격을 입력해 주세요.",
+          })}
           required
           label="Price"
           name="price"
@@ -154,13 +199,17 @@ const Upload: NextPage = () => {
           kind="price"
           onChange={inNumber}
         />
+        {errors.price && <Error>{errors.price?.message}</Error>}
         <TextArea
-          register={register("description", { required: true })}
+          register={register("description", {
+            required: "상품 설명을 입력해 주세요.",
+            minLength: { value: 5, message: "5글자 이상 입력해 주세요." },
+          })}
           name="description"
           label="Description"
           required
         />
-
+        {errors.description && <Error>{errors.description?.message}</Error>}
         <Button text={loading ? "Loading..." : "Upload item"} />
       </form>
     </Layout>

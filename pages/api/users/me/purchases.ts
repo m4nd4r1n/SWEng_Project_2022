@@ -22,10 +22,17 @@ async function handler(
               favs: true,
             },
           },
+          address: {
+            select: {
+              sido: true,
+              sigungu: true,
+            },
+          },
         },
       },
     },
   });
+  console.log(purchases);
   res.json({
     ok: true,
     purchases,

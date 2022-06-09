@@ -30,7 +30,7 @@ const EditProfile: NextPage = () => {
     setError,
     formState: { errors },
     watch,
-  } = useForm<EditProfileForm>();
+  } = useForm<EditProfileForm>({ mode: "onChange" });
   useEffect(() => {
     if (user?.name) setValue("name", user.name);
     if (user?.login.email) setValue("email", user.login.email);

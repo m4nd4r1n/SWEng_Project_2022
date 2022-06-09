@@ -9,9 +9,10 @@ import { useEffect } from "react";
 import { useRouter } from "next/router";
 import { Stream } from "@prisma/client";
 import { inNumber } from "@libs/client/utils";
+import Error from "@components/error";
 
 interface CreateForm {
-  name: string;
+  live: string;
   price: string;
   description: string;
 }
@@ -25,7 +26,11 @@ const Create: NextPage = () => {
   const router = useRouter();
   const [createStream, { loading, data }] =
     useMutation<CreateResponse>(`/api/streams`);
-  const { register, handleSubmit } = useForm<CreateForm>();
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<CreateForm>({ mode: "onChange" });
   const onValid = (form: CreateForm) => {
     if (loading) return;
     createStream(form);
@@ -39,14 +44,20 @@ const Create: NextPage = () => {
     <Layout canGoBack title="Go Live" seoTitle="Create Stream">
       <form onSubmit={handleSubmit(onValid)} className=" space-y-4 py-10 px-4">
         <Input
-          register={register("name", { required: true })}
+          register={register("live", {
+            required: "라이브 제목을 입력해 주세요.",
+          })}
           required
-          label="Name"
-          name="name"
+          label="Live name"
+          name="live"
           type="text"
         />
+        {errors.live && <Error>{errors.live?.message}</Error>}
         <Input
-          register={register("price", { required: true, valueAsNumber: true })}
+          register={register("price", {
+            required: "가격을 입력해 주세요.",
+            valueAsNumber: true,
+          })}
           required
           label="Price"
           name="price"
@@ -54,11 +65,16 @@ const Create: NextPage = () => {
           kind="price"
           onChange={inNumber}
         />
+        {errors.price && <Error>{errors.price?.message}</Error>}
         <TextArea
-          register={register("description", { required: true })}
+          register={register("description", {
+            required: "설명을 입력해 주세요.",
+            minLength: { value: 5, message: "5글자 이상 입력해 주세요." },
+          })}
           name="description"
           label="Description"
         />
+        {errors.description && <Error>{errors.description?.message}</Error>}
         <Button text={loading ? "Loading..." : "Go live"} />
       </form>
     </Layout>

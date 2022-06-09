@@ -12,6 +12,7 @@ import { useForm } from "react-hook-form";
 import Button from "@components/button";
 import { Address, Product, User } from "@prisma/client";
 import { withSsrSession } from "@libs/server/withSession";
+import Error from "@components/error";
 
 interface UserInfoResponse {
   ok: boolean;
@@ -119,7 +120,7 @@ const Review: NextPage<{ userId: number; productId: number }> = ({
             <svg
               key={star}
               className={cls(
-                "h-6 w-6 cursor-pointer hover:fill-orange-500 hover:text-orange-500",
+                "h-8 w-8 cursor-pointer hover:fill-orange-500 hover:text-orange-500",
                 hoverScore >= star ? "fill-orange-500 text-orange-500" : "",
                 !hoverScore && score >= star
                   ? "fill-orange-400 text-orange-400"
@@ -142,9 +143,7 @@ const Review: NextPage<{ userId: number; productId: number }> = ({
             </svg>
           ))}
         </div>
-        <span className="flex justify-center py-2 text-center text-red-500">
-          {errors.formErrors?.message}
-        </span>
+        {errors.formErrors && <Error>{errors.formErrors?.message}</Error>}
         <form onSubmit={handleSubmit(onValid)} className="w-full space-y-4 p-4">
           <TextArea
             label="후기"
@@ -155,9 +154,7 @@ const Review: NextPage<{ userId: number; productId: number }> = ({
             required
             placeholder="후기를 작성해 주세요!"
           />
-          <span className="flex justify-center pb-2 text-center text-red-500">
-            {errors.review?.message}
-          </span>
+          {errors.review && <Error>{errors.review?.message}</Error>}
           <Button text={loading ? "Loading..." : "Submit"} />
         </form>
       </div>

@@ -24,6 +24,10 @@ export default function Input({
   minLength,
   maxLength,
 }: InputProps) {
+  const change = (e: React.ChangeEvent<HTMLInputElement>) => {
+    register.onChange(e);
+    if (onChange) onChange(e);
+  };
   return (
     <div>
       <label
@@ -39,7 +43,7 @@ export default function Input({
             {...register}
             type={type}
             required={required}
-            onChange={onChange}
+            onChange={change}
             minLength={minLength}
             maxLength={maxLength}
             className="w-full appearance-none rounded-md border border-gray-300 px-3 py-2 placeholder-gray-400 shadow-sm focus:border-orange-500 focus:outline-none focus:ring-orange-500"
@@ -56,7 +60,7 @@ export default function Input({
             {...register}
             type={type}
             required={required}
-            onChange={onChange}
+            onChange={change}
             minLength={minLength}
             maxLength={maxLength}
             className="w-full appearance-none rounded-md border border-gray-300 px-3 py-2 pl-7 placeholder-gray-400 shadow-sm focus:border-orange-500 focus:outline-none focus:ring-orange-500"

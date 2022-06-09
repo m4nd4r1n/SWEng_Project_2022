@@ -27,7 +27,7 @@ export default function ProductList({ kind }: ProductListProps) {
           price={record.product.price}
           categoryId={record.product.categoryId}
           address={
-            record.product.address.sido + " " + record.product.address.sigungu
+            record.product.address?.sido + " " + record.product.address?.sigungu
           }
           hearts={record.product._count.favs}
           image={record.product.image}

@@ -11,6 +11,8 @@ import { useForm } from "react-hook-form";
 import { useEffect } from "react";
 import { withSsrSession } from "@libs/server/withSession";
 import client from "@libs/server/client";
+import Image from "next/image";
+import Error from "@components/error";
 
 interface AnswerWithUser extends Answer {
   user: User;
@@ -42,7 +44,12 @@ interface AnswerResponse {
 
 const CommunityPostDetail: NextPage = () => {
   const router = useRouter();
-  const { register, handleSubmit, reset } = useForm<AnswerForm>();
+  const {
+    register,
+    handleSubmit,
+    reset,
+    formState: { errors },
+  } = useForm<AnswerForm>({ mode: "onChange" });
   const { data, mutate } = useSWR<CommunityPostResponse>(
     router.query.id ? `/api/posts/${router.query.id}` : null
   );
@@ -89,8 +96,20 @@ const CommunityPostDetail: NextPage = () => {
         <span className="my-3 ml-4 inline-flex items-center rounded-full bg-gray-100 px-2.5 py-0.5 text-xs font-medium text-gray-800">
           동네질문
         </span>
-        <div className="mb-3 flex cursor-pointer items-center space-x-3  border-b px-4 pb-3">
-          <div className="h-10 w-10 rounded-full bg-slate-300" />
+        <div className="mb-3 flex items-center space-x-3  border-b px-4 pb-3">
+          {data?.post.user.avatar ? (
+            <div className="flex">
+              <Image
+                className="rounded-full"
+                src={`https://imagedelivery.net/mBDIPXvPr-qhWpouLgwjOQ/${data?.post.user.avatar}/avatar`}
+                width={40}
+                height={40}
+                alt=""
+              />
+            </div>
+          ) : (
+            <div className="h-10 w-10 rounded-full bg-slate-300" />
+          )}
           <div>
             {data ? (
               <p className="text-sm font-medium text-gray-700">
@@ -175,8 +194,12 @@ const CommunityPostDetail: NextPage = () => {
             name="description"
             placeholder="Answer this question!"
             required
-            register={register("answer", { required: true, minLength: 5 })}
+            register={register("answer", {
+              required: true,
+              minLength: { value: 5, message: "5글자 이상 입력해 주세요." },
+            })}
           />
+          {errors.answer && <Error>{errors.answer.message}</Error>}
           <button className="mt-2 w-full rounded-md border border-transparent bg-orange-500 py-2 px-4 text-sm font-medium text-white shadow-sm hover:bg-orange-600 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 ">
             {answerLoading ? "Loading..." : "Reply"}
           </button>

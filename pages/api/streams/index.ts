@@ -9,7 +9,7 @@ async function handler(
 ) {
   const {
     session: { user },
-    body: { name, price, description },
+    body: { live: name, price, description },
   } = req;
   if (req.method === "POST") {
     const {

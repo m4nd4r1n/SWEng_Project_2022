@@ -22,6 +22,12 @@ async function handler(
               favs: true,
             },
           },
+          address: {
+            select: {
+              sido: true,
+              sigungu: true,
+            },
+          },
         },
       },
     },

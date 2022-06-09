@@ -8,6 +8,7 @@ import { useForm } from "react-hook-form";
 import useMutation from "@libs/client/useMutation";
 import { useEffect } from "react";
 import useCoords from "@libs/client/useCoords";
+import Error from "@components/error";
 
 interface WriteForm {
   question: string;
@@ -21,7 +22,11 @@ interface WriteResponse {
 const Write: NextPage = () => {
   const { latitude, longitude } = useCoords();
   const router = useRouter();
-  const { register, handleSubmit } = useForm<WriteForm>();
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<WriteForm>({ mode: "onChange" });
   const [post, { loading, data }] = useMutation<WriteResponse>("/api/posts");
   const onValid = (data: WriteForm) => {
     if (loading) return;
@@ -36,10 +41,14 @@ const Write: NextPage = () => {
     <Layout canGoBack title="Write Post" seoTitle="Post Write">
       <form onSubmit={handleSubmit(onValid)} className="space-y-4 p-4">
         <TextArea
-          register={register("question", { required: true, minLength: 5 })}
+          register={register("question", {
+            required: true,
+            minLength: { message: "5글자 이상 입력해 주세요.", value: 5 },
+          })}
           required
           placeholder="Ask a question!"
         />
+        {errors.question && <Error>{errors.question.message}</Error>}
         <Button text={loading ? "Loading..." : "Submit"} />
       </form>
     </Layout>

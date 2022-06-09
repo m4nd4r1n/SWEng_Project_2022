@@ -7,6 +7,8 @@ import useMutation from "@libs/client/useMutation";
 import { useRouter } from "next/router";
 import Link from "next/link";
 import { inNumber } from "@libs/client/utils";
+import { isEmail } from "@libs/client/utils";
+import Error from "@components/error";
 
 interface EnterForm {
   email: string;
@@ -20,13 +22,21 @@ interface EnterForm {
 
 interface MutationResult {
   ok: boolean;
+  error?: string;
 }
 
 const Register: NextPage = () => {
-  const [reg, { loading, data, error }] = useMutation<MutationResult>(
+  const [reg, { loading, data }] = useMutation<MutationResult>(
     "/api/users/register"
   );
-  const { register, handleSubmit, getValues } = useForm<EnterForm>();
+  const {
+    register,
+    handleSubmit,
+    getValues,
+    formState: { errors },
+  } = useForm<EnterForm>({
+    mode: "onChange",
+  });
 
   const onValid = (validForm: EnterForm) => {
     if (loading) return;
@@ -56,9 +66,10 @@ const Register: NextPage = () => {
           >
             <Input
               register={register("email", {
-                required: true,
-                minLength: 5,
+                required: "E-mail을 입력해 주세요.",
+                minLength: { message: "5글자 이상 입력해 주세요.", value: 5 },
                 maxLength: 30,
+                validate: { isEmail },
               })}
               name="email"
               label="E-mail"
@@ -67,10 +78,11 @@ const Register: NextPage = () => {
               maxLength={30}
               required
             />
+            {errors.email && <Error>{errors.email?.message}</Error>}
             <Input
               register={register("password", {
-                required: true,
-                minLength: 5,
+                required: "비밀번호를 입력해 주세요",
+                minLength: { message: "5글자 이상 입력해 주세요.", value: 5 },
                 maxLength: 20,
               })}
               name="password"
@@ -80,10 +92,11 @@ const Register: NextPage = () => {
               maxLength={20}
               required
             />
+            {errors.password && <Error>{errors.password?.message}</Error>}
             <Input
               register={register("passwordConfirm", {
-                required: true,
-                minLength: 5,
+                required: "비밀번호를 한 번 더 입력해 주세요",
+                minLength: { message: "5글자 이상 입력해 주세요.", value: 5 },
                 maxLength: 20,
                 validate: {
                   matchPreviousPassword: (value) => {
@@ -101,10 +114,13 @@ const Register: NextPage = () => {
               maxLength={20}
               required
             />
+            {errors.passwordConfirm && (
+              <Error>{errors.passwordConfirm?.message}</Error>
+            )}
             <Input
               register={register("name", {
-                required: true,
-                minLength: 2,
+                required: "이름을 입력해 주세요.",
+                minLength: { message: "2글자 이상 입력해 주세요.", value: 2 },
                 maxLength: 15,
               })}
               name="name"
@@ -114,6 +130,7 @@ const Register: NextPage = () => {
               maxLength={15}
               required
             />
+            {errors.name && <Error>{errors.name?.message}</Error>}
             <div className="flex items-center space-x-4">
               <Input
                 register={register("phoneFirst", {
@@ -158,8 +175,11 @@ const Register: NextPage = () => {
                 required
               />
             </div>
-
+            {(errors.phoneFirst || errors.phoneMiddle || errors.phoneLast) && (
+              <Error>전화번호를 입력해 주세요.</Error>
+            )}
             <Button text={loading ? "Loading..." : "Register"} />
+            {!data?.ok && <Error>{data?.error}</Error>}
           </form>
           <div className="mb-8 flex">
             <Link href="/enter">
