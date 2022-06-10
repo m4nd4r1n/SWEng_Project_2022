@@ -119,7 +119,7 @@ const CommunityPostDetail: NextPage = () => {
               <div className="h-[0.875rem] animate-pulse rounded-md bg-slate-300" />
             )}
             <Link href={`/users/profiles/${data?.post?.user?.id}`}>
-              <a className="text-xs font-medium text-gray-500">
+              <a className="text-xs font-medium text-gray-500 transition hover:text-gray-700">
                 View profile &rarr;
               </a>
             </Link>
@@ -200,7 +200,7 @@ const CommunityPostDetail: NextPage = () => {
             })}
           />
           {errors.answer && <Error>{errors.answer.message}</Error>}
-          <button className="mt-2 w-full rounded-md border border-transparent bg-orange-500 py-2 px-4 text-sm font-medium text-white shadow-sm hover:bg-orange-600 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 ">
+          <button className="mt-2 w-full rounded-md border border-transparent bg-orange-500 py-2 px-4 text-sm font-medium text-white shadow-sm transition hover:bg-orange-600 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 ">
             {answerLoading ? "Loading..." : "Reply"}
           </button>
         </form>

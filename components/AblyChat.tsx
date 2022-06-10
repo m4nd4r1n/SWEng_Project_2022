@@ -218,7 +218,7 @@ const AblyChat = ({ roomId }: any) => {
               )}
             <input
               type="text"
-              className="ml-2 w-full rounded-full border-gray-300 pr-12 shadow-sm focus:border-orange-500 focus:outline-none focus:ring-orange-500"
+              className="ml-2 w-full rounded-full border-gray-300 pr-12 shadow-sm transition focus:border-orange-500 focus:outline-none focus:ring-orange-500"
               ref={inputBox}
               value={messageText}
               placeholder="Type a message..."
@@ -227,7 +227,7 @@ const AblyChat = ({ roomId }: any) => {
             />
             <div className="absolute inset-y-0 right-0 flex py-1.5 pr-1.5">
               <button
-                className="flex items-center rounded-full bg-orange-500 px-3 text-sm text-white hover:bg-orange-600 focus:ring-2 focus:ring-orange-500 focus:ring-offset-2"
+                className="flex items-center rounded-full bg-orange-500 px-3 text-sm text-white transition hover:bg-orange-600 focus:ring-2 focus:ring-orange-500 focus:ring-offset-2"
                 type="submit"
                 disabled={messageTextIsEmpty}
               >

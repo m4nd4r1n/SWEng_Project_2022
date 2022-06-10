@@ -3,6 +3,7 @@ import Link from "next/link";
 import Layout from "@components/layout";
 import useSWR from "swr";
 import Image from "next/image";
+import { Product } from "@prisma/client";
 
 interface Join {
   user: {
@@ -19,6 +20,7 @@ interface RoomList {
   id: number;
   join: Join[];
   lastMessage?: string | RequestMessage;
+  product: Product;
 }
 
 interface ChatRoomListResponse {
@@ -47,7 +49,13 @@ const Chats: NextPage = () => {
                 <div className="h-12 w-12 rounded-full bg-slate-300" />
               )}
               <div>
-                <p className="text-gray-700">{list.join[0].user.name}</p>
+                <p className="flex items-center text-gray-700">
+                  {list.join[0].user.name}
+                  {"ㆍ"}
+                  <span className="text-sm text-gray-600">
+                    {list.product.name}
+                  </span>
+                </p>
                 <p className="text-sm  text-gray-500">
                   {typeof list.lastMessage === "string"
                     ? list?.lastMessage?.slice(0, 30)

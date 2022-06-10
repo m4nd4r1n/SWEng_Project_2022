@@ -34,7 +34,7 @@ const Users: NextPage = () => {
           <input
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            className="flex w-full appearance-none rounded-lg border border-gray-300 px-3 py-2 placeholder-gray-400 shadow-sm focus:border-orange-500 focus:outline-none focus:ring-orange-500"
+            className="flex w-full appearance-none rounded-lg border border-gray-300 px-3 py-2 placeholder-gray-400 shadow-sm transition focus:border-orange-500 focus:outline-none focus:ring-orange-500"
             placeholder="계정 검색"
           />
         </div>
@@ -142,7 +142,7 @@ const Users: NextPage = () => {
                       {user.id !== me?.id &&
                         (user?.disabled ? (
                           <div
-                            className="flex items-center justify-center text-gray-400 transition hover:text-black"
+                            className="flex cursor-pointer items-center justify-center text-gray-400 transition hover:text-black"
                             onClick={() => {
                               if (
                                 window.confirm(
@@ -175,7 +175,7 @@ const Users: NextPage = () => {
                           </div>
                         ) : (
                           <div
-                            className="flex items-center justify-center text-gray-400 transition hover:text-red-600"
+                            className="flex cursor-pointer items-center justify-center text-gray-400 transition hover:text-red-600"
                             onClick={() => {
                               if (
                                 window.confirm(

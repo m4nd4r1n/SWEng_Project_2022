@@ -266,7 +266,7 @@ model Room {
   id        Int      @id @default(autoincrement())
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-  product   Product  @relation(fields: [productId], references: [id])
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
   productId Int
   join      Join[]
 
@@ -289,7 +289,7 @@ model Wallet {
   createdAt           DateTime              @default(now())
   updatedAt           DateTime              @updatedAt
   currency            Int
-  user                User                  @relation(fields: [userId], references: [id])
+  user                User                  @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId              Int                   @unique
   WalletChargeHistory WalletChargeHistory[]
 
@@ -301,7 +301,7 @@ model WalletChargeHistory {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   amounts   Int
-  wallet    Wallet   @relation(fields: [walletId], references: [id])
+  wallet    Wallet   @relation(fields: [walletId], references: [id], onDelete: Cascade)
   walletId  Int
 
   @@index([walletId])

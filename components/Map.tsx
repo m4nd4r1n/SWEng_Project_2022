@@ -17,11 +17,15 @@ function Map({ latitude, longitude }: MapProps) {
   useEffect(() => {
     const mapScript = document.createElement("script");
 
-    console.log(process.env.NEXT_PUBLIC_KAKAO_MAP);
     mapScript.async = true;
     mapScript.src = `//dapi.kakao.com/v2/maps/sdk.js?appkey=${process.env.NEXT_PUBLIC_KAKAO_MAP}&autoload=false`;
 
     document.head.appendChild(mapScript);
+
+    const map = document.createElement("script");
+    map.async = true;
+    map.src = `//dapi.kakao.com/v2/maps/sdk.js?appkey=${process.env.NEXT_PUBLIC_KAKAO_MAP}&libraries=services&autoload=false`;
+    document.head.appendChild(map);
 
     const onLoadKakaoMap = () => {
       window.kakao.maps.load(() => {
@@ -42,7 +46,11 @@ function Map({ latitude, longitude }: MapProps) {
     };
     mapScript.addEventListener("load", onLoadKakaoMap);
 
-    return () => mapScript.removeEventListener("load", onLoadKakaoMap);
+    return () => {
+      mapScript.removeEventListener("load", onLoadKakaoMap);
+      document.head.removeChild(mapScript);
+      document.head.removeChild(map);
+    };
   }, [latitude, longitude]);
 
   return <MapContainer id="map" />;

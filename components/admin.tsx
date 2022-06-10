@@ -7,7 +7,7 @@ export default function Admin({ manager }: any) {
       <div className="flex justify-around border-b p-4">
         <Link href="/management/users">
           <a className="flex flex-col items-center">
-            <div className="flex h-14 w-14 items-center justify-center rounded-full bg-orange-400 text-white">
+            <div className="flex h-14 w-14 items-center justify-center rounded-full bg-orange-400 text-white transition hover:bg-orange-500">
               <svg
                 className="h-6 w-6"
                 fill="none"
@@ -30,7 +30,7 @@ export default function Admin({ manager }: any) {
         </Link>
         <Link href="/management/reports">
           <a className="flex flex-col items-center">
-            <div className="flex h-14 w-14 items-center justify-center rounded-full bg-orange-400 text-white">
+            <div className="flex h-14 w-14 items-center justify-center rounded-full bg-orange-400 text-white transition hover:bg-orange-500">
               <svg
                 className="h-6 w-6"
                 fill="none"

@@ -83,12 +83,12 @@ export const products = categories
   .reduce((prev, curr) => [...prev, ...curr]);
 
 export const users = [
-  { phone: "010-1111-2222", name: "김당근" },
-  { phone: "010-2222-3333", name: "박서울" },
-  { phone: "010-3333-4444", name: "서부산" },
-  { phone: "010-4444-5555", name: "최하늘" },
-  { phone: "010-5555-6666", name: "김치" },
-  { phone: "010-6666-7777", name: "이파리" },
+  { phone: "01011112222", name: "김당근" },
+  { phone: "01022223333", name: "박서울" },
+  { phone: "01033334444", name: "서부산" },
+  { phone: "01044445555", name: "최하늘" },
+  { phone: "01055556666", name: "김치" },
+  { phone: "01066667777", name: "이파리" },
 ];
 
 export const login = [

@@ -31,6 +31,7 @@ export default function ProductList({ kind }: ProductListProps) {
           }
           hearts={record.product._count.favs}
           image={record.product.image}
+          onSale={record.product.onSale}
         />
       ))}
     </>

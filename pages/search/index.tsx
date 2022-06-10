@@ -54,11 +54,11 @@ const Search: NextPage = () => {
                 setQuery(inputText);
               }
             }}
-            className="flex w-full appearance-none rounded-l-lg border border-gray-300 px-3 py-2 placeholder-gray-400 shadow-sm focus:border-orange-500 focus:outline-none focus:ring-orange-500"
+            className="flex w-full appearance-none rounded-l-lg border border-gray-300 px-3 py-2 placeholder-gray-400 shadow-sm transition focus:border-orange-500 focus:outline-none focus:ring-orange-500"
           />
           <button
             onClick={() => setQuery(inputText)}
-            className="flex h-[42px] min-w-[50px] items-center justify-center rounded-r-lg bg-orange-400 hover:ring-2 hover:ring-orange-200"
+            className="flex h-[42px] min-w-[50px] items-center justify-center rounded-r-lg bg-orange-400 transition hover:bg-orange-500 hover:ring-2 hover:ring-orange-200"
           >
             <svg
               className="h-5 w-5 transition-colors"
@@ -88,6 +88,7 @@ const Search: NextPage = () => {
                 price={product.price}
                 hearts={product._count?.favs || 0}
                 image={product.image}
+                onSale={product.onSale}
               />
             ))
           : "Loading..."}

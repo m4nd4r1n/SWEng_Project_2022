@@ -25,8 +25,7 @@ export default function useAddress() {
   useEffect(() => {
     const map = document.createElement("script");
     map.async = true;
-    map.src = `//dapi.kakao.com/v2/maps/sdk.js?appkey=${process.env
-      .NEXT_PUBLIC_KAKAO_MAP!}&libraries=services&autoload=false`;
+    map.src = `//dapi.kakao.com/v2/maps/sdk.js?appkey=${process.env.NEXT_PUBLIC_KAKAO_MAP}&libraries=services&autoload=false`;
     document.head.appendChild(map);
     const onLoad = () => {
       window.kakao.maps.load(() => {

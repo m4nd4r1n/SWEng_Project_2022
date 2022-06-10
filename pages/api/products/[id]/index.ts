@@ -30,6 +30,11 @@ async function handler(
             sigungu: true,
           },
         },
+        category: {
+          select: {
+            name: true,
+          },
+        },
       },
     });
     const terms = product?.name.split(" ").map((word) => ({

@@ -53,6 +53,7 @@ const Home: NextPage = () => {
                     localStorage.products_scroll = window.scrollY;
                     localStorage.products_size = size;
                   }}
+                  onSale={product.onSale}
                 />
               ));
             })

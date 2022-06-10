@@ -95,6 +95,11 @@ async function handler(
             NOT: { userId: user?.id },
           },
         },
+        product: {
+          select: {
+            name: true,
+          },
+        },
       },
       where: {
         join: {

@@ -62,7 +62,7 @@ const Profile: NextPage = () => {
             <span className="pb-2 font-bold text-gray-900">{user?.name}</span>
             <div className="flex w-full justify-between">
               <Link href={`/users/profiles/${user?.id}`}>
-                <a className="flex space-x-1 text-sm text-gray-400 hover:text-black">
+                <a className="flex space-x-1 text-sm text-gray-400 transition hover:text-black">
                   <span>상세정보</span>
                   <div className="flex items-center justify-center">
                     <svg
@@ -79,7 +79,7 @@ const Profile: NextPage = () => {
                 </a>
               </Link>
               <Link href="/profile/edit">
-                <a className="flex space-x-1 text-sm text-gray-400 hover:text-black">
+                <a className="flex space-x-1 text-sm text-gray-400 transition hover:text-black">
                   <span>프로필 수정</span>
                   <div className="flex items-center justify-center">
                     <svg
@@ -111,14 +111,16 @@ const Profile: NextPage = () => {
           </Link>
           <Link href="/profile/wallet/charge">
             <a className="flex w-1/5 items-center justify-end">
-              <span className="select-none pr-4 text-gray-500">충전하기</span>
+              <span className="select-none pr-4 text-gray-500 transition hover:text-gray-700">
+                충전하기
+              </span>
             </a>
           </Link>
         </div>
         <div className="mt-10 flex justify-around">
           <Link href="/profile/sold">
             <a className="flex flex-col items-center">
-              <div className="flex h-14 w-14 items-center justify-center rounded-full bg-orange-400 text-white">
+              <div className="flex h-14 w-14 items-center justify-center rounded-full bg-orange-400 text-white transition hover:bg-orange-500">
                 <svg
                   className="h-6 w-6"
                   fill="none"
@@ -141,7 +143,7 @@ const Profile: NextPage = () => {
           </Link>
           <Link href="/profile/bought">
             <a className="flex flex-col items-center">
-              <div className="flex h-14 w-14 items-center justify-center rounded-full bg-orange-400 text-white">
+              <div className="flex h-14 w-14 items-center justify-center rounded-full bg-orange-400 text-white transition hover:bg-orange-500">
                 <svg
                   className="h-6 w-6"
                   fill="none"
@@ -164,7 +166,7 @@ const Profile: NextPage = () => {
           </Link>
           <Link href="/profile/loved">
             <a className="flex flex-col items-center">
-              <div className="flex h-14 w-14 items-center justify-center rounded-full bg-orange-400 text-white">
+              <div className="flex h-14 w-14 items-center justify-center rounded-full bg-orange-400 text-white transition hover:bg-orange-500">
                 <svg
                   className="h-6 w-6"
                   fill="none"

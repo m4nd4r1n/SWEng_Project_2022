@@ -11,6 +11,7 @@ interface ItemProps {
   hearts: number;
   image: string | undefined;
   onClick?: () => void;
+  onSale: boolean;
 }
 
 export default function Item({
@@ -22,6 +23,7 @@ export default function Item({
   id,
   image,
   onClick,
+  onSale,
 }: ItemProps) {
   return (
     <Link href={`/products/${id}`}>
@@ -49,7 +51,14 @@ export default function Item({
               {"ㆍ"}
               {address}
             </span>
-            <span className="mt-1 font-medium text-gray-900">₩{price}</span>
+            <div className="mt-1 flex font-medium text-gray-900">
+              {!onSale && (
+                <span className="mr-1 flex items-center rounded-md bg-gray-600 px-1 text-xs font-normal text-white">
+                  거래완료
+                </span>
+              )}
+              ₩{price}
+            </div>
           </div>
         </div>
         <div className="flex items-end justify-end space-x-2">
