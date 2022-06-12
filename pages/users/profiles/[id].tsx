@@ -550,7 +550,7 @@ const Profile: NextPage = () => {
               ))}
           </div>
         )}
-        {reports?.reports.length !== 0 && me?.manager && (
+        {reports?.reports && reports?.reports.length !== 0 && me?.manager && (
           <div className="flex flex-col justify-end divide-y border-b-2">
             <button
               className="flex items-center justify-end space-x-2 p-4 text-sm text-gray-500 transition hover:text-black"

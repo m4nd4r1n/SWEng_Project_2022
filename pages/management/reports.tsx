@@ -159,7 +159,30 @@ export const getServerSideProps = withSsrSession(
         },
       };
     }
-    const reports = await client.report.findMany();
+    const reports = await client.report.findMany({
+      where: {
+        AND: [
+          {
+            user: {
+              disabled: false,
+            },
+          },
+        ],
+      },
+      include: {
+        user: {
+          select: {
+            id: true,
+            disabled: true,
+          },
+        },
+        product: {
+          select: {
+            id: true,
+          },
+        },
+      },
+    });
     return {
       props: {
         reports: JSON.parse(JSON.stringify(reports)),

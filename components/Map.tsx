@@ -11,6 +11,7 @@ const MapContainer = tw.div`
   border-gray-400
   rounded-lg
   aspect-[320/220]
+  -z-10
 `;
 
 function Map({ latitude, longitude }: MapProps) {
