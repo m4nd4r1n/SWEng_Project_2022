@@ -13,24 +13,53 @@ async function handler(
 
   if (req.method === "POST") {
     const {
-      body: { title, description, userId },
+      body: { title, description, userId, productId },
     } = req;
 
-    const report = await client.report.create({
-      data: {
-        title: title,
-        description: description,
-        user: {
-          connect: {
-            id: userId,
+    if (productId) {
+      const product = await client.product.findUnique({
+        where: {
+          id: productId,
+        },
+      });
+
+      const report = await client.report.create({
+        data: {
+          title: title,
+          description: description,
+          user: {
+            connect: {
+              id: product?.userId,
+            },
+          },
+          product: {
+            connect: {
+              id: productId,
+            },
           },
         },
-      },
-    });
-    res.json({
-      ok: true,
-      report,
-    });
+      });
+      res.json({
+        ok: true,
+        report,
+      });
+    } else {
+      const report = await client.report.create({
+        data: {
+          title: title,
+          description: description,
+          user: {
+            connect: {
+              id: userId,
+            },
+          },
+        },
+      });
+      res.json({
+        ok: true,
+        report,
+      });
+    }
   }
   if (req.method === "GET") {
     if (user?.manager) {

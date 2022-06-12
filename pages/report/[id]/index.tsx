@@ -44,7 +44,7 @@ const WriteReport: NextPage = () => {
   });
 
   return (
-    <Layout canGoBack title="Report User" seoTitle="Report User">
+    <Layout canGoBack title="Report User" seoTitle="Report">
       <form className="space-y-4 p-4" onSubmit={handleSubmit(onValid)}>
         <Input
           register={register("title", { required: true })}
