@@ -23,9 +23,7 @@ interface ProductsResponse {
 const Home: NextPage = () => {
   const { user } = useUser();
   const getKey = (index: number) => `/api/products?page=${index}`;
-  const { data, size, setSize } = useSWRInfinite<ProductsResponse>(getKey, {
-    revalidateFirstPage: false,
-  });
+  const { data, size, setSize } = useSWRInfinite<ProductsResponse>(getKey);
   const isEnd = data && data[data.length - 1]?.products?.length < 15;
   useEffect(() => {
     if (localStorage.products_scroll && localStorage.products_size) {

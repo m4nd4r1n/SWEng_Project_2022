@@ -9,6 +9,7 @@ import { Report } from "@prisma/client";
 import { useForm } from "react-hook-form";
 import { useEffect } from "react";
 import { withSsrSession } from "@libs/server/withSession";
+import Error from "@components/error";
 
 interface UploadReportForm {
   title: string;
@@ -23,7 +24,13 @@ interface UploadReportMutation {
 const WriteReport: NextPage = () => {
   const router = useRouter();
   const userId = parseInt(router.query.id as string);
-  const { register, handleSubmit } = useForm<UploadReportForm>();
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<UploadReportForm>({
+    mode: "onChange",
+  });
   const [uploadReport, { loading, data }] =
     useMutation<UploadReportMutation>("/api/reports");
 
@@ -47,18 +54,29 @@ const WriteReport: NextPage = () => {
     <Layout canGoBack title="Report User" seoTitle="Report">
       <form className="space-y-4 p-4" onSubmit={handleSubmit(onValid)}>
         <Input
-          register={register("title", { required: true })}
+          register={register("title", {
+            required: "제목을 입력해 주세요.",
+            maxLength: {
+              message: "최대 100자까지 입력할 수 있습니다.",
+              value: 100,
+            },
+          })}
           required
           label="제목"
           name="title"
           type="text"
+          maxLength={100}
         />
+        {errors.title && <Error>{errors.title?.message}</Error>}
         <TextArea
-          register={register("description", { required: true })}
+          register={register("description", {
+            required: "신고사유를 입력해 주세요.",
+          })}
           name="description"
           label="신고사유"
           required
         />
+        {errors.description && <Error>{errors.description?.message}</Error>}
         <Button text={loading ? "Loading..." : "Report"} />
       </form>
     </Layout>

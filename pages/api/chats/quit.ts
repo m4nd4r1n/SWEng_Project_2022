@@ -9,18 +9,18 @@ async function handler(
 ) {
   const {
     session: { user },
-    body: { roomId },
+    query: { roomId },
   } = req;
 
   if (!roomId) return res.status(400).json({ ok: false });
 
   await client.room.delete({
     where: {
-      id: roomId,
+      id: +roomId,
     },
   });
 
   res.json({ ok: true });
 }
 
-export default withApiSession(withHandler({ methods: ["POST"], handler }));
+export default withApiSession(withHandler({ methods: ["DELETE"], handler }));

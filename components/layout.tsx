@@ -11,6 +11,7 @@ interface LayoutProps {
   hasTabBar?: boolean;
   children: React.ReactNode;
   seoTitle?: string;
+  chatExit?: () => void;
 }
 
 export default function Layout({
@@ -19,6 +20,7 @@ export default function Layout({
   hasTabBar,
   children,
   seoTitle,
+  chatExit,
 }: LayoutProps) {
   const router = useRouter();
   const onClick = () => {
@@ -62,8 +64,11 @@ export default function Layout({
           ) : (
             <div />
           )}
-          {router.pathname === "/profile" ? (
-            <button className="ml-auto items-center" onClick={onLogoutClick}>
+          {router.pathname === "/profile" || chatExit ? (
+            <button
+              className="ml-auto items-center"
+              onClick={chatExit ? chatExit : onLogoutClick}
+            >
               <svg
                 className="h-6 w-6"
                 fill="none"

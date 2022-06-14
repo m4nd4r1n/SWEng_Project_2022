@@ -11,65 +11,79 @@ async function handler(
     query: { id },
     session: { user },
   } = req;
-  const streamInfo = await client.stream.findUnique({
-    where: {
-      id: +id.toString(),
-    },
-    include: {
-      messages: {
-        select: {
-          id: true,
-          message: true,
-          user: {
-            select: {
-              avatar: true,
-              id: true,
+  if (req.method === "GET") {
+    const streamInfo = await client.stream.findUnique({
+      where: {
+        id: +id.toString(),
+      },
+      include: {
+        messages: {
+          select: {
+            id: true,
+            message: true,
+            user: {
+              select: {
+                avatar: true,
+                id: true,
+              },
             },
           },
         },
       },
-    },
-  });
-  const { videoUID, live } = await (
-    await fetch(
-      `https://videodelivery.net/${streamInfo?.cloudflareId}/lifecycle`
-    )
-  ).json();
-
-  if (!live) {
-    const { result } = await (
+    });
+    const { videoUID, live } = await (
       await fetch(
-        `https://api.cloudflare.com/client/v4/accounts/${process.env.CF_ID}/stream/live_inputs/${streamInfo?.cloudflareId}/videos`,
-        {
-          headers: {
-            Authorization: `Bearer ${process.env.CF_STREAM_TOKEN}`,
-          },
-        }
+        `https://videodelivery.net/${streamInfo?.cloudflareId}/lifecycle`
       )
     ).json();
-    if (result.length !== 0) {
-      const { thumbnail, preview } = result[0];
-      const stream = { ...streamInfo, videoUID, live, thumbnail, preview };
-      const isOwner = stream?.userId === user?.id;
-      if (stream && !isOwner) {
-        stream.cloudflareKey = "";
-        stream.cloudflareUrl = "";
+
+    if (!live) {
+      const { result } = await (
+        await fetch(
+          `https://api.cloudflare.com/client/v4/accounts/${process.env.CF_ID}/stream/live_inputs/${streamInfo?.cloudflareId}/videos`,
+          {
+            headers: {
+              Authorization: `Bearer ${process.env.CF_STREAM_TOKEN}`,
+            },
+          }
+        )
+      ).json();
+      if (result.length !== 0) {
+        const { thumbnail, preview } = result[0];
+        const stream = { ...streamInfo, videoUID, live, thumbnail, preview };
+        const isOwner = stream?.userId === user?.id;
+        if (stream && !isOwner) {
+          stream.cloudflareKey = "";
+          stream.cloudflareUrl = "";
+        }
+        return res.json({ ok: true, stream });
       }
-      return res.json({ ok: true, stream });
+    }
+    const stream = { ...streamInfo, videoUID, live };
+    const isOwner = stream?.userId === user?.id;
+    if (stream && !isOwner) {
+      stream.cloudflareKey = "";
+      stream.cloudflareUrl = "";
+    }
+    return res.json({ ok: true, stream });
+  }
+  if (req.method === "DELETE") {
+    const deleteStream = await client.stream.delete({
+      where: {
+        id: +id,
+      },
+    });
+    if (deleteStream) {
+      res.json({ ok: true });
+    } else {
+      res.status(500).json({ ok: false });
     }
   }
-  const stream = { ...streamInfo, videoUID, live };
-  const isOwner = stream?.userId === user?.id;
-  if (stream && !isOwner) {
-    stream.cloudflareKey = "";
-    stream.cloudflareUrl = "";
-  }
-  return res.json({ ok: true, stream });
 }
 
 export default withApiSession(
   withHandler({
-    methods: ["GET"],
+    methods: ["GET", "DELETE"],
     handler,
   })
 );

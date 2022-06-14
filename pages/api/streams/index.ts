@@ -50,6 +50,7 @@ async function handler(
     const streams = await client.stream.findMany({
       take: 15,
       skip: 15 * +page,
+      orderBy: { createdAt: "desc" },
     });
     res.json({ ok: true, streams });
   }

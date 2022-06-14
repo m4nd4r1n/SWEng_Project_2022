@@ -3,7 +3,7 @@ import Layout from "@components/layout";
 import TextArea from "@components/textarea";
 import { Answer, Post, User } from "@prisma/client";
 import { useRouter } from "next/router";
-import useSWR, { SWRConfig, unstable_serialize } from "swr";
+import useSWR from "swr";
 import Link from "next/link";
 import useMutation from "@libs/client/useMutation";
 import { cls } from "@libs/client/utils";
@@ -13,6 +13,7 @@ import { withSsrSession } from "@libs/server/withSession";
 import client from "@libs/server/client";
 import Image from "next/image";
 import Error from "@components/error";
+import useUser from "@libs/client/useUser";
 
 interface AnswerWithUser extends Answer {
   user: User;
@@ -58,6 +59,7 @@ const CommunityPostDetail: NextPage = () => {
   );
   const [sendAnswer, { data: answerData, loading: answerLoading }] =
     useMutation<AnswerResponse>(`/api/posts/${router.query.id}/answers`);
+  const { user } = useUser();
   const onWonderClick = () => {
     if (!data) return;
     mutate(
@@ -90,14 +92,19 @@ const CommunityPostDetail: NextPage = () => {
       mutate();
     }
   }, [answerData, reset, mutate]);
+  useEffect(() => {
+    if (data?.post === null) {
+      router.back();
+    }
+  }, [data, router]);
   return (
-    <Layout canGoBack>
+    <Layout canGoBack seoTitle={data?.post?.question}>
       <div>
         <span className="my-3 ml-4 inline-flex items-center rounded-full bg-gray-100 px-2.5 py-0.5 text-xs font-medium text-gray-800">
           동네질문
         </span>
-        <div className="mb-3 flex items-center space-x-3  border-b px-4 pb-3">
-          {data?.post.user.avatar ? (
+        <div className="mb-3 flex items-center justify-start space-x-3 border-b px-4 pb-3">
+          {data?.post?.user.avatar ? (
             <div className="flex">
               <Image
                 className="rounded-full"
@@ -124,6 +131,33 @@ const CommunityPostDetail: NextPage = () => {
               </a>
             </Link>
           </div>
+          {(user?.id === data?.post?.user.id || user?.manager) && (
+            <button
+              className="!ml-auto"
+              onClick={() => {
+                if (window.confirm("삭제하시겠습니까?")) {
+                  fetch(`/api/posts/${router.query.id}`, {
+                    method: "DELETE",
+                  }).then(() => router.back());
+                }
+              }}
+            >
+              <svg
+                className="h-6 w-6"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="2"
+                  d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                ></path>
+              </svg>
+            </button>
+          )}
         </div>
         <div>
           <div className="mt-2 px-4 text-gray-700">
@@ -176,16 +210,64 @@ const CommunityPostDetail: NextPage = () => {
         <div className="my-5 space-y-5 px-4">
           {data?.post?.answers?.map((answer) => (
             <div key={answer.id} className="flex items-start space-x-3">
-              <div className="h-8 w-8 rounded-full bg-slate-200" />
-              <div>
+              {answer.user.avatar ? (
+                <div className="block">
+                  <Image
+                    src={`https://imagedelivery.net/mBDIPXvPr-qhWpouLgwjOQ/${answer.user.avatar}/avatar`}
+                    className="block rounded-full"
+                    height={32}
+                    width={32}
+                    alt=""
+                  />
+                </div>
+              ) : (
+                <div className="h-8 w-8 rounded-full bg-slate-200" />
+              )}
+              <div className="w-5/6">
                 <span className="block text-sm font-medium text-gray-700">
                   {answer.user.name}
                 </span>
                 <span className="block text-xs text-gray-500 ">
                   {new Date(answer.createdAt).toLocaleString()}
                 </span>
-                <p className="mt-2 text-gray-700">{answer.answer}</p>
+                <p className="mt-2 break-words text-gray-700">
+                  {answer.answer}
+                </p>
               </div>
+              {(user?.id === answer.user.id || user?.manager) && (
+                <button
+                  className="!ml-auto"
+                  onClick={() => {
+                    if (window.confirm("삭제하시겠습니까?")) {
+                      fetch(`/api/posts/${answer.id}/answers`, {
+                        method: "DELETE",
+                      }).then(() =>
+                        mutate({
+                          ...data,
+                          post: {
+                            ...data.post,
+                          },
+                        })
+                      );
+                    }
+                  }}
+                >
+                  <svg
+                    className="h-6 w-6"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth="2"
+                      d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                    ></path>
+                  </svg>
+                </button>
+              )}
             </div>
           ))}
         </div>
