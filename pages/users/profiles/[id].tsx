@@ -243,10 +243,13 @@ const Profile: NextPage = () => {
                   <span className="font-bold text-orange-600">
                     {" "}
                     {reviews?.reviews &&
-                      reviews?.reviews
-                        .map((review) => review?.score)
-                        .reduce((sum, currValue) => sum + currValue, 0) /
-                        (reviews?.reviews.length || 1)}
+                      Math.round(
+                        (reviews?.reviews
+                          .map((review) => review?.score)
+                          .reduce((sum, currValue) => sum + currValue, 0) /
+                          (reviews?.reviews.length || 1)) *
+                          100
+                      ) / 100}
                   </span>
                 </div>
                 <div className="text-sm">
