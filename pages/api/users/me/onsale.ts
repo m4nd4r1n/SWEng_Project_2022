@@ -10,32 +10,29 @@ async function handler(
   const {
     session: { user },
   } = req;
-  const purchases = await client.purchase.findMany({
+
+  const onsale = await client.product.findMany({
     where: {
       userId: user?.id,
+      onSale: true,
     },
     include: {
-      product: {
-        include: {
-          _count: {
-            select: {
-              favs: true,
-            },
-          },
-          address: {
-            select: {
-              sido: true,
-              sigungu: true,
-            },
-          },
+      _count: {
+        select: {
+          favs: true,
+        },
+      },
+      address: {
+        select: {
+          sido: true,
+          sigungu: true,
         },
       },
     },
   });
-
   res.json({
     ok: true,
-    purchases,
+    onsale,
   });
 }
 
