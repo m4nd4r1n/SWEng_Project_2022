@@ -14,9 +14,7 @@ interface StreamsResponse {
 
 const Streams: NextPage = () => {
   const getKey = (index: number) => `/api/streams?page=${index}`;
-  const { data, size, setSize } = useSWRInfinite<StreamsResponse>(getKey, {
-    revalidateFirstPage: false,
-  });
+  const { data, size, setSize } = useSWRInfinite<StreamsResponse>(getKey);
   const isEnd = data && data[data.length - 1]?.streams?.length < 15;
   useEffect(() => {
     if (localStorage.streams_scroll && localStorage.streams_size) {

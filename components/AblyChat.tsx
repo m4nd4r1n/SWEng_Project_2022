@@ -182,8 +182,21 @@ const AblyChat = ({ roomId }: any) => {
   useEffect(() => {
     messageEnd.current?.scrollIntoView({ behavior: "smooth" });
   }, [receivedMessages]);
+
+  const chatExit = () => {
+    if (window.confirm("채팅방에서 나가시겠습니까?")) {
+      fetch(`/api/chats/quit?roomId=${roomId}`, { method: "DELETE" }).then(() =>
+        router.back()
+      );
+    }
+  };
   return (
-    <Layout canGoBack title={data?.user?.name} seoTitle="Chat Detail">
+    <Layout
+      canGoBack
+      title={data?.user?.name}
+      seoTitle="Chat Detail"
+      chatExit={chatExit}
+    >
       <div className="space-y-4 py-10 px-4 pb-16">
         <div className="space-y-4">
           {messages}

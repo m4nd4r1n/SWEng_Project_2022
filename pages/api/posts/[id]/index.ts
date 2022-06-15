@@ -11,62 +11,76 @@ async function handler(
     query: { id },
     session: { user },
   } = req;
-  const post = await client.post.findUnique({
-    where: {
-      id: +id.toString(),
-    },
-    include: {
-      user: {
-        select: {
-          id: true,
-          name: true,
-          avatar: true,
-        },
+  if (req.method === "GET") {
+    const post = await client.post.findUnique({
+      where: {
+        id: +id.toString(),
       },
-      answers: {
-        select: {
-          answer: true,
-          id: true,
-          createdAt: true,
-          user: {
-            select: {
-              id: true,
-              name: true,
-              avatar: true,
+      include: {
+        user: {
+          select: {
+            id: true,
+            name: true,
+            avatar: true,
+          },
+        },
+        answers: {
+          select: {
+            answer: true,
+            id: true,
+            createdAt: true,
+            user: {
+              select: {
+                id: true,
+                name: true,
+                avatar: true,
+              },
             },
           },
         },
-      },
-      _count: {
-        select: {
-          answers: true,
-          wondering: true,
+        _count: {
+          select: {
+            answers: true,
+            wondering: true,
+          },
         },
       },
-    },
-  });
-  const isWondering = Boolean(
-    await client.wondering.findFirst({
-      where: {
-        postId: +id.toString(),
-        userId: user?.id,
-      },
-      select: {
-        id: true,
-      },
-    })
-  );
+    });
+    const isWondering = Boolean(
+      await client.wondering.findFirst({
+        where: {
+          postId: +id.toString(),
+          userId: user?.id,
+        },
+        select: {
+          id: true,
+        },
+      })
+    );
 
-  res.json({
-    ok: true,
-    post,
-    isWondering,
-  });
+    res.json({
+      ok: true,
+      post,
+      isWondering,
+    });
+  }
+  if (req.method === "DELETE") {
+    const deletePost = await client.post.delete({
+      where: {
+        id: +id,
+      },
+    });
+    if (deletePost) {
+      res.json({ ok: true });
+    } else {
+      res.status(500).json({ ok: false });
+    }
+  }
 }
 
 export default withApiSession(
   withHandler({
-    methods: ["GET"],
+    methods: ["GET", "DELETE"],
     handler,
   })
 );
