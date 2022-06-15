@@ -118,7 +118,7 @@ const ItemDetail: NextPage = () => {
                       ) {
                         fetch(`/api/products/${data?.product?.id}`, {
                           method: "DELETE",
-                        }).then(() => router.back());
+                        }).then(() => router.push('/'));
                       }
                     }}
                   >
