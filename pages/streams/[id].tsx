@@ -137,7 +137,7 @@ const Streams: NextPage = () => {
                 if (window.confirm("삭제하시겠습니까?")) {
                   fetch(`/api/streams/${router.query.id}`, {
                     method: "DELETE",
-                  }).then(() => router.back());
+                  }).then(() => router.replace("/streams"));
                 }
               }}
             >
