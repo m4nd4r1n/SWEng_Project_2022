@@ -76,7 +76,7 @@ const Search: NextPage = () => {
           </button>
         </div>
       </div>
-      <div className="mt-30 flex flex-col space-y-5 divide-y">
+      <div className="mt-32 flex flex-col space-y-5 divide-y">
         {data
           ? data?.products?.map((product) => (
               <Item
