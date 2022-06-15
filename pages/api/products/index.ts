@@ -36,8 +36,6 @@ async function handler(
       orderBy: {
         createdAt: "desc",
       },
-      take: 15,
-      skip: 15 * +page,
     });
     if (views.length === 0) {
       return res.json({
@@ -99,9 +97,15 @@ async function handler(
       newProducts = [...newProducts, ...subProducts];
     }
 
+    const splicedProducts = newProducts.splice(15 * +page, 15);
+
     res.json({
       ok: true,
-      products: newProducts,
+      products: [
+        ...splicedProducts.splice(0, 3),
+        ...splicedProducts.splice(3, 3),
+        ...splicedProducts,
+      ],
     });
   }
   if (req.method === "POST") {
